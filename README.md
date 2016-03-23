@@ -10,7 +10,7 @@ João Marçal   78471 joao.marcal12@gmail.com
 
 
 Repositório:
-[tecnico-distsys/C_XX-project](https://github.com/tecnico-distsys/C_XX-project/)
+[tecnico-distsys/A_44-project](https://github.com/tecnico-distsys/A_44-project)
 
 -------------------------------------------------------------------------------
 
@@ -21,8 +21,8 @@ Repositório:
 
 [0] Iniciar sistema operativo
 
-Indicar Windows ou Linux
 Linux
+
 
 [1] Iniciar servidores de apoio
 
