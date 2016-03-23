@@ -1,14 +1,12 @@
 # Projeto de Sistemas Distribuídos 2015-2016 #
 
-Grupo de SD ... - Campus ...
-*(preencher com número do grupo de SD no Fénix e depois apagar esta linha)*
+Grupo de SD 44 - Campus Alameda
 
-... ... ...
+José Semedo   78294 jose.francisco.semedo@gmail.com
 
-... ... ...
+Lídia Freitas 78559 lidiamcfreitas@gmail.com
 
-... ... ...
-*(preencher com nome, número e email de membro do grupo e depois apagar esta linha)*
+João Marçal   78471 joao.marcal12@gmail.com
 
 
 Repositório:
@@ -24,8 +22,7 @@ Repositório:
 [0] Iniciar sistema operativo
 
 Indicar Windows ou Linux
-*(escolher um dos dois, que esteja disponível nos laboratórios, e depois apagar esta linha)*
-
+Linux
 
 [1] Iniciar servidores de apoio
 
