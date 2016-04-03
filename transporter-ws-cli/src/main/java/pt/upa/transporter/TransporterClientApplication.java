@@ -48,7 +48,7 @@ public class TransporterClientApplication {
     requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
 
     System.out.println("Remote call ...");
-    String result = port.ping("Cliente");
+    String result = port.ping("Client");
     System.out.println(result);
   }
 }
