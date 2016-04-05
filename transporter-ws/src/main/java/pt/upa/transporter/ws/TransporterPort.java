@@ -17,7 +17,7 @@ public class TransporterPort implements TransporterPortType {
   public String ping(String name) {
     // TODO Auto-generated method stub
     System.out.println("Received Ping from " + name);
-    return "Transporter Online";
+    return "Pong " + name + "!";
   }
 
   @Override

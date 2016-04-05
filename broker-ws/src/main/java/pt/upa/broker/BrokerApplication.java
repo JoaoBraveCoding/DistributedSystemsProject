@@ -1,12 +1,23 @@
 package pt.upa.broker;
 
+import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
+
+import java.util.Collection;
+import java.util.Map;
+
+import javax.xml.registry.JAXRException;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Endpoint;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
 import pt.upa.broker.ws.BrokerPort;
+import pt.upa.broker.ws.BrokerPortType;
+import pt.upa.broker.ws.BrokerService;
+import pt.upa.transporter.ws.TransporterPortType;
+import pt.upa.transporter.ws.TransporterService;
 
 public class BrokerApplication {
-
+  private static BrokerPort broker;
 	public static void main(String[] args) throws Exception {
     //Check arguments
     if (args.length < 3) {
@@ -23,7 +34,8 @@ public class BrokerApplication {
     Endpoint endpoint = null;
     UDDINaming uddiNaming = null;
     try {
-      endpoint = Endpoint.create(new BrokerPort());
+      broker = new BrokerPort();
+      endpoint = Endpoint.create(broker);
       
       //publish endpoint
       System.out.printf("Starting %s%n", url);
@@ -32,6 +44,19 @@ public class BrokerApplication {
       //publish to UDDI
       System.out.printf("publishing '%s' to UDDI at %s%n", name, uddiURL);
       uddiNaming = new UDDINaming(uddiURL);
+      
+      //TODO ask professor if why does the uddiNaming.list does not work
+//      Collection<String> resultUDDIList;
+//      resultUDDIList = uddiNaming.list("UpaTransporter1");
+//      if(resultUDDIList == null || resultUDDIList.isEmpty()){
+//        System.out.println("Did not get a list of transporters from UDDI");
+//      }
+      
+      //TODO ADD for to add all the transporters
+      //Adding transporter to broker
+      System.out.println("Adding transporters...");
+      broker.addTransporter("Something", uddiNaming);
+      
       uddiNaming.rebind(name, url);
 
       //wait

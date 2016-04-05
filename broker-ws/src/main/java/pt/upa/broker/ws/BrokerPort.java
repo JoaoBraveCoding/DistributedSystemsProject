@@ -1,8 +1,18 @@
 package pt.upa.broker.ws;
 
+import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.jws.WebService;
+import javax.xml.registry.JAXRException;
+import javax.xml.ws.BindingProvider;
+
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import pt.upa.transporter.ws.TransporterPortType;
+import pt.upa.transporter.ws.TransporterService;
 
 @WebService(
     endpointInterface="pt.upa.broker.ws.BrokerPortType",
@@ -14,11 +24,21 @@ import javax.jws.WebService;
     )
 public class BrokerPort implements BrokerPortType {
 
+  private List<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
+  
   @Override
   public String ping(String name) {
-    // TODO Auto-generated method stub
+    String returnValue;
     System.out.println("Received ping request with message " + name);
-    return "Broker online";
+    
+    //Pingging transporters 
+    System.out.println("Pingging transporters");
+    for(TransporterPortType port : transporters){
+      returnValue = port.ping("Broker");
+      System.out.println(returnValue);
+    }
+    
+    return "Pong " + name + "!";
   }
 
   @Override
@@ -47,5 +67,26 @@ public class BrokerPort implements BrokerPortType {
   }
 
 	// TODO
+   
+  public List<TransporterPortType> getTransporters(){
+    return this.transporters;
+  }
+  
+  public void addTransporter(String name, UDDINaming uddiNaming) throws JAXRException{
+    String endpointAddress = uddiNaming.lookup("UpaTransporter1");
+    if (endpointAddress == null) {
+      System.out.println("Not found!");
+      return;
+    }
+    TransporterService service = new TransporterService();
+    TransporterPortType port = service.getTransporterPort();
+    
+    System.out.println("Setting endpoint address ...");
+    BindingProvider bindingProvider = (BindingProvider) port;
+    Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
 
+    transporters.add(port);
+  }
+  
 }
