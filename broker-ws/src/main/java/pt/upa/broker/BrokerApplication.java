@@ -13,7 +13,7 @@ import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import pt.upa.broker.ws.BrokerPort;
 import pt.upa.broker.ws.BrokerPortType;
 import pt.upa.broker.ws.BrokerService;
-import pt.upa.transporter.ws.TransporterPortType;
+import pt.upa.transporter.ws.TransporterPortType; 
 import pt.upa.transporter.ws.TransporterService;
 
 public class BrokerApplication {
@@ -45,18 +45,17 @@ public class BrokerApplication {
       System.out.printf("publishing '%s' to UDDI at %s%n", name, uddiURL);
       uddiNaming = new UDDINaming(uddiURL);
       
-      //TODO ask professor if why does the uddiNaming.list does not work
-//      Collection<String> resultUDDIList;
-//      resultUDDIList = uddiNaming.list("UpaTransporter1");
-//      if(resultUDDIList == null || resultUDDIList.isEmpty()){
-//        System.out.println("Did not get a list of transporters from UDDI");
-//      }
+      Collection<String> resultUDDIList;
+      resultUDDIList = uddiNaming.list("UpaTransporter%");
+      if(resultUDDIList == null || resultUDDIList.isEmpty()){
+        System.out.println("Did not get a list of transporters from UDDI");
+      }
       
-      //TODO ADD for to add all the transporters
       //Adding transporter to broker
       System.out.println("Adding transporters...");
-      broker.addTransporter("Something", uddiNaming);
-      
+      for(String s : resultUDDIList)
+        broker.addTransporter(s, uddiNaming);
+            
       uddiNaming.rebind(name, url);
 
       //wait

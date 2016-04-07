@@ -29,7 +29,7 @@ public class BrokerPort implements BrokerPortType {
   @Override
   public String ping(String name) {
     String returnValue;
-    System.out.println("Received ping request with message " + name);
+    System.out.println("Received ping from " + name);
     
     //Pingging transporters 
     System.out.println("Pingging transporters");
@@ -73,7 +73,7 @@ public class BrokerPort implements BrokerPortType {
   }
   
   public void addTransporter(String name, UDDINaming uddiNaming) throws JAXRException{
-    String endpointAddress = uddiNaming.lookup("UpaTransporter1");
+    String endpointAddress = name;
     if (endpointAddress == null) {
       System.out.println("Not found!");
       return;
@@ -81,7 +81,6 @@ public class BrokerPort implements BrokerPortType {
     TransporterService service = new TransporterService();
     TransporterPortType port = service.getTransporterPort();
     
-    System.out.println("Setting endpoint address ...");
     BindingProvider bindingProvider = (BindingProvider) port;
     Map<String, Object> requestContext = bindingProvider.getRequestContext();
     requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
