@@ -18,12 +18,11 @@ import javax.jws.WebService;
     )
 public class TransporterPort implements TransporterPortType {
 
-  //conjunto de viagens que orçamentam e aprovam
   private String name;
   private int identifierCounter;
   private Map<String, String> locations = new HashMap<String, String>();
-  private Random rn = new Random();
   private List<JobView> jobs = new ArrayList<JobView>();
+  private Random rn = new Random();
   
   public TransporterPort(String name) {
     this.name = name;
@@ -37,7 +36,7 @@ public class TransporterPort implements TransporterPortType {
     locations.put("Viseu", "Center");
     locations.put("Guarda", "Center");
     
-    if(name.matches("UpaTransporter[123456789]*[02468]$")){
+    if(name.matches("UpaTransporter[1-9]*[02468]$")){
       locations.put("Porto", "North");
       locations.put("Braga", "North");
       locations.put("Viana Do Castelo", "North");
@@ -160,21 +159,46 @@ public class TransporterPort implements TransporterPortType {
 
   @Override
   public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
-    // TODO Auto-generated method stub
-    return null;
+    String[] parts = id.split(".");
+    int i = Integer.parseInt(parts[parts.length - 1]);
+    
+    if(jobs.get(i) == null){
+      //TODO throw exception
+      return null;
+    }
+    
+    if(accept){
+      jobs.get(i).setJobState(jobs.get(i).getJobState().ACCEPTED);
+    }
+    
+    else{
+      jobs.get(i).setJobState(jobs.get(i).getJobState().REJECTED);
+    }
+    return jobs.get(i);
   }
+  
 
   @Override
   public JobView jobStatus(String id) {
-    // TODO Auto-generated method stub
-    return null;
+    String[] parts = id.split(".");
+    int i = Integer.parseInt(parts[parts.length - 1]);
+
+    if(jobs.get(i) == null) {
+      return null;
+    }
+    
+    //TODO see if this is safe or is needed to use other object
+    return jobs.get(i);
+    
   }
+  
 
   @Override
   public List<JobView> listJobs() {
     //TODO see if this is safe or if we need to return something else
     return jobs;
   }
+  
 
   @Override
   public void clearJobs() {

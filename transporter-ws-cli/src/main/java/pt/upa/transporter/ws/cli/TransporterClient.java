@@ -9,6 +9,7 @@ import javax.xml.registry.JAXRException;
 import javax.xml.ws.BindingProvider;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import pt.upa.transporter.ws.BadJobFault_Exception;
 import pt.upa.transporter.ws.BadLocationFault_Exception;
 import pt.upa.transporter.ws.BadPriceFault_Exception;
 import pt.upa.transporter.ws.JobView;
@@ -68,8 +69,13 @@ public class TransporterClient {
   public void clearJobs() {
     port.clearJobs();
   }
-  
 
-	// TODO
+  public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
+    return port.decideJob(id, accept);
+  }
+  
+  public JobView jobStatus(String id) {
+    return port.jobStatus(id);
+  }
 
 }
