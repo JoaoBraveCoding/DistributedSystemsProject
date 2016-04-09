@@ -28,22 +28,25 @@ Linux
 
 JUDDI:
 ```
-...
+O servidor de nomes a utilizar é o jUDDI (Java UDDI).
+Para lançar o servidor, basta executar o seguinte comando na pasta juddi-.../bin:
+ $./startup.sh (Linux e Mac)
+ $./startup.bat (Windows)
 ```
 
 
 [2] Criar pasta temporária
 
 ```
-cd ...
-mkdir ...
+cd ~
+mkdir Project
 ```
 
 
 [3] Obter código fonte do projeto (versão entregue)
 
 ```
-git clone ... 
+git clone  https://github.com/tecnico-distsys/A_44-project.git
 ```
 *(colocar aqui comandos git para obter a versão entregue a partir da tag e depois apagar esta linha)*
 
@@ -55,12 +58,6 @@ cd uddi-naming
 mvn clean install
 ```
 
-```
-cd ...
-mvn clean install
-```
-
-
 -------------------------------------------------------------------------------
 
 ### Serviço TRANSPORTER
@@ -68,7 +65,7 @@ mvn clean install
 [1] Construir e executar **servidor**
 
 ```
-cd ...-ws
+cd transporter-ws
 mvn clean install
 mvn exec:java
 ```
@@ -76,7 +73,7 @@ mvn exec:java
 [2] Construir **cliente** e executar testes
 
 ```
-cd ...-ws-cli
+cd transporter-ws-cli
 mvn clean install
 ```
 
@@ -90,7 +87,7 @@ mvn clean install
 [1] Construir e executar **servidor**
 
 ```
-cd ...-ws
+cd broker-ws
 mvn clean install
 mvn exec:java
 ```
@@ -99,7 +96,7 @@ mvn exec:java
 [2] Construir **cliente** e executar testes
 
 ```
-cd ...-ws-cli
+cd broker-ws-cli
 mvn clean install
 ```
 
