@@ -13,14 +13,12 @@ import pt.upa.broker.ws.BrokerService;
 
 public class BrokerClient {
   
-  private String uddiURL;
   private UDDINaming uddiNaming;
   private String endpointAddress;
   private BrokerPortType port;
   
   public BrokerClient(String uddiURL, String name) throws JAXRException{
-    this.uddiURL = uddiURL;
-    setUDDINaming(this.uddiURL);
+    setUDDINaming(uddiURL);
     setEndpointAddresss(name);
     createPort();
   }
@@ -39,9 +37,8 @@ public class BrokerClient {
       System.out.printf("Found %s%n", endpointAddress);
     }
   }
-
   
-  public void createPort(){
+  private void createPort(){
     System.out.println("Creating stub ...");
     BrokerService service = new BrokerService();
     port = service.getBrokerPort();

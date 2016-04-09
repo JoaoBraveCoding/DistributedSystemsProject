@@ -22,7 +22,7 @@ public class TransporterApplication {
 		Endpoint endpoint = null;
 		UDDINaming uddiNaming = null;
 		try {
-		  endpoint = Endpoint.create(new TransporterPort());
+		  endpoint = Endpoint.create(new TransporterPort(name));
 		  
 		  //publish endpoint
 		  System.out.printf("Starting %s%n", url);

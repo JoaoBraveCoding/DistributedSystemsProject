@@ -1,14 +1,6 @@
 package pt.upa.transporter;
 
-import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
-
-import javax.xml.ws.BindingProvider;
-
-import java.util.Map;
-
-import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
-import pt.upa.transporter.ws.TransporterPortType;
-import pt.upa.transporter.ws.TransporterService;
+import pt.upa.transporter.ws.cli.TransporterClient;
 
 public class TransporterClientApplication {
 
@@ -22,33 +14,10 @@ public class TransporterClientApplication {
     
     System.out.println(TransporterClientApplication.class.getSimpleName() + " starting...");
 
-    String uddiURL = args[0];
-    String name = args[1];
-
-    System.out.printf("Contacting UDDI at %s%n", uddiURL);
-    UDDINaming uddiNaming = new UDDINaming(uddiURL);
-
-    System.out.printf("Looking for '%s'%n", name);
-    String endpointAddress = uddiNaming.lookup(name);
-
-    if (endpointAddress == null) {
-      System.out.println("Not found!");
-      return;
-    } else {
-      System.out.printf("Found %s%n", endpointAddress);
-    }
-
-    System.out.println("Creating stub ...");
-    TransporterService service = new TransporterService();
-    TransporterPortType port = service.getTransporterPort();
-
-    System.out.println("Setting endpoint address ...");
-    BindingProvider bindingProvider = (BindingProvider) port;
-    Map<String, Object> requestContext = bindingProvider.getRequestContext();
-    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
-
+    TransporterClient client = new TransporterClient(args[0], args[1]);
+    
     System.out.println("Remote call ...");
-    String result = port.ping("Client");
+    String result = client.ping("Client");
     System.out.println(result);
   }
 }

@@ -11,6 +11,7 @@ import javax.xml.registry.JAXRException;
 import javax.xml.ws.BindingProvider;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import pt.upa.transporter.ws.JobStateView;
 import pt.upa.transporter.ws.TransporterPortType;
 import pt.upa.transporter.ws.TransporterService;
 
@@ -40,7 +41,6 @@ public class BrokerPort implements BrokerPortType {
         counter++;
       }
     }
-    
     return "Pong " + name + "! " + "(" + counter + "/" + transporters.size() + ")" + " transporters online/transporters";
   }
 
