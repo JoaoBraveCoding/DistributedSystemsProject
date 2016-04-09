@@ -29,16 +29,19 @@ public class BrokerPort implements BrokerPortType {
   @Override
   public String ping(String name) {
     String returnValue;
+    int counter = 0;
     System.out.println("Received ping from " + name);
     
     //Pingging transporters 
     System.out.println("Pingging transporters");
     for(TransporterPortType port : transporters){
       returnValue = port.ping("Broker");
-      System.out.println(returnValue);
+      if (returnValue.equals("Pong Broker!")){
+        counter++;
+      }
     }
     
-    return "Pong " + name + "!";
+    return "Pong " + name + "! " + "(" + counter + "/" + transporters.size() + ")" + " transporters online/transporters";
   }
 
   @Override
