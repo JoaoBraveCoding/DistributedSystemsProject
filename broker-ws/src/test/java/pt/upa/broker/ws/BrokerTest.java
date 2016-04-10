@@ -13,6 +13,7 @@ public class BrokerTest extends AbstractBrokerTest{
   protected void populate() {
     // TODO Auto-generated method stub
     broker = new BrokerPort();
+    createTransportView("UpaTransporter1", "Job", "Lisboa", "Leiria", 33);
   }
   
 
@@ -32,9 +33,28 @@ public class BrokerTest extends AbstractBrokerTest{
       broker.requestTransport("Lisboa", "", 12);
   }
   
+  @Test (expected = UnknownLocationFault_Exception.class)
+  public void broker_requestTransport_destinationUnknown() throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
+      broker.requestTransport("Lisboa", "Torres Vedras", 12);
+  }
+  
+  @Test (expected = UnknownLocationFault_Exception.class)
+  public void broker_requestTransport_originUnknown() throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
+      broker.requestTransport("Torres Vedras", "Lisboa", 12);
+  }
+  
   @Test (expected = UnavailableTransportFault_Exception.class)
-  public void requestTransport() throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
+  public void broker_requestTransport_noTransporter() throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
       broker.requestTransport("Viseu", "Lisboa", 12);
   }
+  
+  @Test
+  public void broker_clearTransports_success() {
+      broker.clearTransports();
+      //FIXME what should be asserted in this operation
+      //assertEquals("Pong Test! (0/0) transporters online/transporters", broker.getTransporters().isEmpty());
+  }  
+  
+  
   
 }

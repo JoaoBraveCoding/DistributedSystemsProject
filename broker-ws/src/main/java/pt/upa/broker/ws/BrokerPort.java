@@ -26,6 +26,7 @@ import pt.upa.transporter.ws.TransporterService;
 public class BrokerPort implements BrokerPortType {
 
   private List<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
+  private List<TransportView>    transports      = new ArrayList<TransportView>();
   
   @Override
   public String ping(String name) {
@@ -59,8 +60,7 @@ public class BrokerPort implements BrokerPortType {
 
   @Override
   public List<TransportView> listTransports() {
-    // TODO Auto-generated method stub
-    return null;
+    return transports;
   }
 
   @Override
