@@ -21,8 +21,9 @@ public class TransporterApplication {
 	  
 		Endpoint endpoint = null;
 		UDDINaming uddiNaming = null;
+		TransporterPort tp = new TransporterPort(name);
 		try {
-		  endpoint = Endpoint.create(new TransporterPort(name));
+		  endpoint = Endpoint.create(tp);
 		  
 		  //publish endpoint
 		  System.out.printf("Starting %s%n", url);
@@ -45,7 +46,8 @@ public class TransporterApplication {
 		} finally {
 		  try {
 		    if (endpoint != null) {
-		      //stop endpoint
+		      //stop endpoin
+		      tp.stopTimer();
 		      endpoint.stop();
 		      System.out.printf("Stopped %s%n", url);
 		    }

@@ -11,7 +11,6 @@ import javax.xml.registry.JAXRException;
 import javax.xml.ws.BindingProvider;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
-import pt.upa.transporter.ws.JobStateView;
 import pt.upa.transporter.ws.TransporterPortType;
 import pt.upa.transporter.ws.TransporterService;
 
@@ -28,6 +27,7 @@ public class BrokerPort implements BrokerPortType {
   private List<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
   private List<TransportView>    transports      = new ArrayList<TransportView>();
   
+
   @Override
   public String ping(String name) {
     String returnValue;
@@ -73,6 +73,10 @@ public class BrokerPort implements BrokerPortType {
    
   public List<TransporterPortType> getTransporters(){
     return this.transporters;
+  }
+  
+  public List<TransportView> getTransports() {
+    return transports;
   }
   
   public void addTransporter(String name, UDDINaming uddiNaming) throws JAXRException{
