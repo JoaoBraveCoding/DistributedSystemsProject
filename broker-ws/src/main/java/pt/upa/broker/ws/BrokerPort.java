@@ -182,7 +182,7 @@ public class BrokerPort implements BrokerPortType {
   private String getTransporterPortTypeName(TransporterPortType transporter){
 	  for (Integer i = 0; i < transporters.size(); i++){
 		  if(transporter == transporters.get(i)){
-			  return "Transporter" + i.toString();
+			  return i.toString();
 		  }
 	  }
 	  return "";
@@ -190,8 +190,12 @@ public class BrokerPort implements BrokerPortType {
 
   @Override
   public TransportView viewTransport(String id) throws UnknownTransportFault_Exception {
-    // TODO Auto-generated method stub
-    return null;
+	for(TransportView transport: transports){
+		if(transport.getId() == id) return transport;
+	}
+	UnknownTransportFault fault = new UnknownTransportFault();
+	fault.setId(id);
+    throw new UnknownTransportFault_Exception("Transport not found. ", fault);
   }
 
   @Override
@@ -201,11 +205,10 @@ public class BrokerPort implements BrokerPortType {
 
   @Override
   public void clearTransports() {
-	for(TransportView transport: transports){
-		transport.getTransporterCompany();
+	for(TransporterPortType transporter: transporters){
+		transporter.clearJobs();
 	}
-    // TODO Auto-generated method stub
-    
+    transports = new ArrayList<TransportView>();
   }
    
   public List<TransporterPortType> getTransporters(){
