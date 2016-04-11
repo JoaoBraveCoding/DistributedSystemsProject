@@ -78,7 +78,7 @@ public class BrokerPort implements BrokerPortType {
   @Override
   public String requestTransport(String origin, String destination, int price) throws InvalidPriceFault_Exception,
   UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
-	  // TODO should it be checked here or in the transporter or badlocation?
+
 	  // check if origin is known
 	  placeExists(origin);
 	  // check if destination is known
