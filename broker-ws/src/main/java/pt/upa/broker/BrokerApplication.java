@@ -35,7 +35,7 @@ public class BrokerApplication {
     UDDINaming uddiNaming = null;
     try {
       broker = new BrokerPort();
-      endpoint = Endpoint.create(broker);
+      endpoint = Endpoint.create(broker); // TODO check if successful
       
       //publish endpoint
       System.out.printf("Starting %s%n", url);
