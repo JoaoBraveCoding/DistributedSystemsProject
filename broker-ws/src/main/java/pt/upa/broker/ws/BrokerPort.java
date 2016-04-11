@@ -12,6 +12,7 @@ import javax.xml.registry.JAXRException;
 import javax.xml.ws.BindingProvider;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+
 import pt.upa.transporter.ws.BadJobFault_Exception;
 import pt.upa.transporter.ws.BadLocationFault_Exception;
 import pt.upa.transporter.ws.BadPriceFault_Exception;
@@ -58,6 +59,7 @@ public class BrokerPort implements BrokerPortType {
 	  places.put("Faro", "South");
   }
   
+
   @Override
   public String ping(String name) {
     String returnValue;
@@ -213,6 +215,10 @@ public class BrokerPort implements BrokerPortType {
    
   public List<TransporterPortType> getTransporters(){
     return this.transporters;
+  }
+  
+  public List<TransportView> getTransports() {
+    return transports;
   }
   
   public void addTransporter(String name, UDDINaming uddiNaming) throws JAXRException{

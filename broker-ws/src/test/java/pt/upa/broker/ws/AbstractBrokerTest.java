@@ -1,7 +1,6 @@
 package pt.upa.broker.ws;
 
 import org.junit.*;
-import static org.junit.Assert.*;
 
 public abstract class AbstractBrokerTest {
 
@@ -15,15 +14,15 @@ public abstract class AbstractBrokerTest {
     //TODO add a way to clean prob with broker.clearTransports
   }
 
-  protected void createTransportView(String tc, String string2, String string3, String string4, int i) {
+  protected TransportView createTransportView(String tc, String origin, String destination, String identifier, int price) {
     TransportView tw = new TransportView();
     tw.setTransporterCompany(tc);
-    tw.setDestination("Lisboa");
-    tw.setOrigin("Leiria");
-    tw.setId("Job");
-    tw.setPrice(33);
-    tw.setState(tw.getState().REQUESTED);
-    
+    tw.setOrigin(origin);
+    tw.setDestination(destination);
+    tw.setId(identifier);
+    tw.setPrice(price);
+    tw.setState(TransportStateView.REQUESTED);
+    return tw;
   }
   
   protected abstract void populate(); // each test adds its own data

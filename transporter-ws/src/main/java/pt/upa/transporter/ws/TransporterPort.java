@@ -5,8 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.jws.WebService;
+
+
 
 @WebService(
     endpointInterface="pt.upa.transporter.ws.TransporterPortType",
@@ -18,11 +22,44 @@ import javax.jws.WebService;
     )
 public class TransporterPort implements TransporterPortType {
 
+  private int    identifierCounter;
   private String name;
-  private int identifierCounter;
-  private Map<String, String> locations = new HashMap<String, String>();
+  private Random rn    = new Random();
+  private Timer  timer = new Timer();
   private List<JobView> jobs = new ArrayList<JobView>();
-  private Random rn = new Random();
+  private Map<String, String> locations = new HashMap<String, String>();
+  
+  public class ChangeState extends TimerTask {
+    private JobView      jw;
+    private JobStateView js;
+
+    public ChangeState(JobView jw, JobStateView js){
+      this.jw = jw;
+      this.js = js;
+    }
+    
+    @Override
+    public void run() {
+      jw.setJobState(js);
+      JobStateView jsFuture = null;
+      
+      if(js.equals(JobStateView.HEADING)){
+        jsFuture = JobStateView.ONGOING;
+        TimerTask tt = new ChangeState(jw, jsFuture);
+        timer.schedule(tt, rn.nextInt(4001) + 1000);
+      }
+      
+      if(js.equals(JobStateView.ONGOING)){
+        jsFuture = JobStateView.COMPLETED;
+        TimerTask tt = new ChangeState(jw, jsFuture);
+        timer.schedule(tt, rn.nextInt(4001) + 1000);
+      }
+      
+      else{
+        //js = COMPLETED nothing to do
+      }
+    }
+  }
   
   public TransporterPort(String name) {
     this.name = name;
@@ -52,7 +89,8 @@ public class TransporterPort implements TransporterPortType {
     }
 
   }
-
+    
+  
   @Override
   public String ping(String name) {
     System.out.println("Received Ping from " + name);
@@ -115,7 +153,7 @@ public class TransporterPort implements TransporterPortType {
 
   private int calcPrice(int price) {
     if(price % 2 == 0) {
-      if(name.matches("UpaTransporter[123456789]*[02468]$")) {
+      if(name.matches("UpaTransporter[1-9]*[02468]$")) {
         //transporter and price even
         return rn.nextInt(price);
       }
@@ -127,7 +165,7 @@ public class TransporterPort implements TransporterPortType {
     }
     
     else {
-      if((name.matches("UpaTransporter[123456789]*[02468]$"))) {
+      if((name.matches("UpaTransporter[1-9]*[02468]$"))) {
         //transporter even but price odd
         return rn.nextInt(price) + price;
       }
@@ -138,7 +176,6 @@ public class TransporterPort implements TransporterPortType {
     }
   }
   
-
   private JobView createNewJob(String origin, String destination) {
     JobView budgetJob = new JobView();
     //TODO Don't know if this is right
@@ -146,12 +183,10 @@ public class TransporterPort implements TransporterPortType {
     budgetJob.setJobIdentifier(getIdentifer());
     budgetJob.setJobOrigin(origin);
     budgetJob.setJobDestination(destination);
-    //TODO Don't know if this is right
-    budgetJob.setJobState(budgetJob.getJobState().PROPOSED);
+    budgetJob.setJobState(JobStateView.PROPOSED);
     return budgetJob;
   }
   
- 
   private String getIdentifer(){
     identifierCounter++;
     return name + "." + identifierCounter;
@@ -168,11 +203,13 @@ public class TransporterPort implements TransporterPortType {
     }
     
     if(accept){
-      jobs.get(i).setJobState(jobs.get(i).getJobState().ACCEPTED);
+      jobs.get(i).setJobState(JobStateView.ACCEPTED);
+      TimerTask tt = new ChangeState(jobs.get(i), JobStateView.HEADING);
+      timer.schedule(tt, rn.nextInt(4001) + 1000);
     }
     
     else{
-      jobs.get(i).setJobState(jobs.get(i).getJobState().REJECTED);
+      jobs.get(i).setJobState(JobStateView.REJECTED);
     }
     return jobs.get(i);
   }
@@ -192,18 +229,20 @@ public class TransporterPort implements TransporterPortType {
     
   }
   
-
   @Override
   public List<JobView> listJobs() {
     //TODO see if this is safe or if we need to return something else
     return jobs;
   }
   
-
   @Override
   public void clearJobs() {
     jobs = new ArrayList<JobView>();
     identifierCounter = 0;
+  }
+  
+  public void stopTimer(){
+    timer.cancel();
   }
 
 }

@@ -11,9 +11,10 @@ public class BrokerTest extends AbstractBrokerTest{
   
   @Override
   protected void populate() {
-    // TODO Auto-generated method stub
     broker = new BrokerPort();
-    createTransportView("UpaTransporter1", "Job", "Lisboa", "Leiria", 33);
+    TransportView tw = createTransportView("UpaTransporter1", "Job", "Lisboa", "Leiria", 33);
+    broker.getTransports().add(tw);
+    //FIXME add mores transports so I can test properly the other methods
   }
   
 
@@ -54,7 +55,6 @@ public class BrokerTest extends AbstractBrokerTest{
       //FIXME what should be asserted in this operation
       //assertEquals("Pong Test! (0/0) transporters online/transporters", broker.getTransporters().isEmpty());
   }  
-  
   
   
 }
