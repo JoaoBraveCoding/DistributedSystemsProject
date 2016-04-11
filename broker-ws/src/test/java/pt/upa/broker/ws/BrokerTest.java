@@ -64,6 +64,11 @@ public class BrokerTest extends AbstractBrokerTest{
       broker.requestTransport("Viseu", "Lisboa", 12);
   }
   
+  @Test (expected = InvalidPriceFault_Exception.class)
+  public void broker_requestTransport_badPrice() throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
+      broker.requestTransport("Viseu", "Lisboa", -12);
+  }
+  
   @Test
   public void broker_viewTransport_success() throws UnknownTransportFault_Exception{
     TransportView tw = broker.viewTransport("Job1");
