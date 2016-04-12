@@ -124,14 +124,14 @@ public class TransporterPort implements TransporterPortType {
     }
     
     //check Origin Location
-    if(origin.equals("") || origin == null || !(placesNotOperable.containsKey(origin) || !(locations.containsKey(origin)))){
+    if(origin.equals("") || origin == null || (!(placesNotOperable.containsKey(origin)) && !(locations.containsKey(origin))) ){
       BadLocationFault badLocation = new BadLocationFault();
       badLocation.setLocation(origin);
       throw new BadLocationFault_Exception("Requested a Job with a origin location unknown", badLocation);
     }
       
     //check Destination Location
-    if(destination.equals("") || destination == null || !(placesNotOperable.containsKey(destination)) || !(locations.containsKey(destination))) {
+    if(destination.equals("") || destination == null || (!(placesNotOperable.containsKey(destination)) && !(locations.containsKey(destination))) ){
       BadLocationFault badLocation = new BadLocationFault();
       badLocation.setLocation(destination);
       throw new BadLocationFault_Exception("Requested a Job with a destination location unknown", badLocation);
