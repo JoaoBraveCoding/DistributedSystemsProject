@@ -1,6 +1,7 @@
 package pt.upa.transporter.ws;
 
 import org.junit.Test;
+import java.util.concurrent.TimeUnit;
 
 import pt.upa.transporter.ws.JobView;
 
@@ -114,7 +115,26 @@ public class TransporterTest extends AbstractTransporterTest{
     JobView jv4 = transporter.jobStatus("nonsense");
     assertNull(jv4);
   }
+  
+  @Test
+  public void list_jobs(){
+    assertTrue(viewsEquals(transporter.listJobs().get(0), 0));
+  }
 
+  @Test
+  public void clear_jobs(){
+    transporter.clearJobs();
+    assertTrue(transporter.listJobs().size() == 0);
+  }
+  
+  @Test
+  public void completed_job() throws InterruptedException{
+    TransporterPort.ChangeState cs = transporter.new ChangeState(jobViews.get(0), JobStateView.HEADING);
+    cs.run();
+    TimeUnit.SECONDS.sleep(12);
+    System.out.println(jobViews.get(0).getJobState());
+    assertTrue(jobViews.get(0).getJobState() == JobStateView.COMPLETED);
+  }
   
   private boolean viewsEquals(JobView jv, int i){
     JobView expected = jobViews.get(i);
