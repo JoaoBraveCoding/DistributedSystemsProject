@@ -207,7 +207,7 @@ public class TransporterPort implements TransporterPortType {
 
   @Override
   public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
-    String[] parts = id.split(".");
+    String[] parts = id.split("\\.");
     int i = Integer.parseInt(parts[parts.length - 1]);
     
     if(jobs.get(i) == null){
@@ -230,12 +230,13 @@ public class TransporterPort implements TransporterPortType {
 
   @Override
   public JobView jobStatus(String id) {
-    String[] parts = id.split(".");
-    int i = Integer.parseInt(parts[parts.length - 1]);
-
-    if(jobs.get(i) == null) {
+    String[] parts = id.split("\\.");
+    
+    if(!id.matches("UpaTransporter[1-9]*.[0-9]*$")) {
       return null;
     }
+    
+    int i = Integer.parseInt(parts[parts.length - 1]);
     
     //TODO see if this is safe or is needed to use other object
     return jobs.get(i);

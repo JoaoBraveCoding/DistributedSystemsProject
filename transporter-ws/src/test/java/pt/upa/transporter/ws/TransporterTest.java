@@ -21,11 +21,15 @@ public class TransporterTest extends AbstractTransporterTest{
   protected void populate(){
     transporter = new TransporterPort("UpaTransporter1");
     transporter2 = new TransporterPort("UpaTransporter2");
-    
     JobView jvw = createJobView("UpaTransporter1", "UpaTransporter1.0", "Beja", "Faro", 50, 5); //PROPOSED
     jobViews.add(jvw); //0
+    transporter.listJobs().add(jvw);
     jvw = createJobView("UpaTransporter2", "UpaTransporter2.0", "Porto", "Braga", 50, 5); //PROPOSED
     jobViews.add(jvw); //1
+    jvw = createJobView("UpaTransporter1", "UpaTransporter1.0", "Beja", "Faro", 50, 1); //ACCEPTED
+    jobViews.add(jvw); //2
+    jvw = createJobView("UpaTransporter1", "UpaTransporter1.0", "Beja", "Faro", 50, 6); //ACCEPTED
+    jobViews.add(jvw); //3
 
   }
   
@@ -87,8 +91,31 @@ public class TransporterTest extends AbstractTransporterTest{
     assertTrue(jv3.getJobPrice() < 5 && jv3.getJobPrice() >= 0);
   }
   
+  @Test
+  public void decide_job_accept() throws BadJobFault_Exception{
+    transporter.decideJob("UpaTransporter1.0", true);
+    assertTrue(viewsEquals(transporter.listJobs().get(0), 2));
+  }
+  
+  @Test
+  public void decide_job_decline() throws BadJobFault_Exception{
+    transporter.decideJob("UpaTransporter1.0", false);
+    assertTrue(viewsEquals(transporter.listJobs().get(0), 3));
+  }
+  
+  @Test
+  public void job_Status(){
+    JobView jv4 = transporter.jobStatus("UpaTransporter1.0");
+    assertTrue(viewsEquals(jv4, 0));
+  }
+  
+  @Test
+  public void job_Status_wrongid(){
+    JobView jv4 = transporter.jobStatus("nonsense");
+    assertNull(jv4);
+  }
 
-
+  
   private boolean viewsEquals(JobView jv, int i){
     JobView expected = jobViews.get(i);
     if(jv.getJobDestination().equals(expected.getJobDestination()) &&
