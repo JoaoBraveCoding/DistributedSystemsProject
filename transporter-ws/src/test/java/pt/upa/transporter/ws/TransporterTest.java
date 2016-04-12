@@ -2,7 +2,7 @@ package pt.upa.transporter.ws;
 
 import org.junit.Test;
 
-import pt.upa.broker.ws.TransportView;
+import pt.upa.transporter.ws.JobView;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,13 +17,14 @@ public class TransporterTest extends AbstractTransporterTest{
   @Override
   protected void populate(){
     transporter = new TransporterPort("UpaTransporter1");
-    JobView jvw = createJobView(compName, id, origin, destination, price); //TODO
+    //JobView jvw = createJobView("UpaTransporter1", "Job1", origin, destination, price); //TODO
     
   }
   
   @Test
   public void transporter_ping_success(){
-    
+    String result = transporter.ping("Test");
+    assertEquals("Pong Test!", result);
   }
 
 }
