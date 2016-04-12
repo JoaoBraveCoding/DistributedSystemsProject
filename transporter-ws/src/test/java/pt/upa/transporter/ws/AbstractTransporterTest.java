@@ -15,7 +15,7 @@ public abstract class AbstractTransporterTest {
   }
 
  
-  protected JobView createJobView(String compName, String id, String origin, String destination, int price) {
+  protected JobView createJobView(String compName, String id, String origin, String destination, int price, int type) {
     JobView jvw = new JobView();
     jvw.setCompanyName(compName);
     jvw.setJobIdentifier(id);
@@ -23,9 +23,27 @@ public abstract class AbstractTransporterTest {
     jvw.setJobDestination(destination);
     jvw.setJobPrice(price);
     switch(type) {
-    case
+    case 1:
+      jvw.setJobState(JobStateView.ACCEPTED);
+      break;
+    case 2:
+      jvw.setJobState(JobStateView.COMPLETED);
+      break;
+    case 3:
+      jvw.setJobState(JobStateView.HEADING);
+      break;
+    case 4:
+      jvw.setJobState(JobStateView.ONGOING);
+      break;
+    case 5:
+      jvw.setJobState(JobStateView.PROPOSED);
+      break;
+    case 6:
+      jvw.setJobState(JobStateView.REJECTED);
+      break;
+    default:
+      //google's java style
     }
-    jvw.setJobState(JobStateView.); //TODO
     return jvw;
   }
   
