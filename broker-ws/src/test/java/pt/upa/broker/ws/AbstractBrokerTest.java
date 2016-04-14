@@ -14,7 +14,7 @@ public abstract class AbstractBrokerTest {
     //TODO add a way to clean prob with broker.clearTransports
   }
 
-  protected TransportView createTransportView(String tc, String origin, String destination, String identifier, int price) {
+  protected TransportView createTransportView(String tc, String identifier, String origin, String destination, int price) {
     TransportView tw = new TransportView();
     tw.setTransporterCompany(tc);
     tw.setOrigin(origin);

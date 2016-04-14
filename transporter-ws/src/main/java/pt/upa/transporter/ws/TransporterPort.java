@@ -28,6 +28,7 @@ public class TransporterPort implements TransporterPortType {
   private Timer  timer = new Timer();
   private List<JobView> jobs = new ArrayList<JobView>();
   private Map<String, String> locations = new HashMap<String, String>();
+  private Map<String, String> placesNotOperable = new HashMap<String, String>();
   
   public class ChangeState extends TimerTask {
     private JobView      jw;
@@ -79,6 +80,12 @@ public class TransporterPort implements TransporterPortType {
       locations.put("Viana Do Castelo", "North");
       locations.put("Vila Real", "North");
       locations.put("Bragança", "North");
+
+      placesNotOperable.put("Setúbal", "South");
+      placesNotOperable.put("Évora", "South");
+      placesNotOperable.put("Portalegre", "South");
+      placesNotOperable.put("Beja", "South");
+      placesNotOperable.put("Faro", "South");
     }
     else{
       locations.put("Setúbal", "South");
@@ -86,6 +93,12 @@ public class TransporterPort implements TransporterPortType {
       locations.put("Portalegre", "South");
       locations.put("Beja", "South");
       locations.put("Faro", "South");
+      
+      placesNotOperable.put("Porto", "North");
+      placesNotOperable.put("Braga", "North");
+      placesNotOperable.put("Viana Do Castelo", "North");
+      placesNotOperable.put("Vila Real", "North");
+      placesNotOperable.put("Bragança", "North");
     }
 
   }
@@ -111,21 +124,21 @@ public class TransporterPort implements TransporterPortType {
     }
     
     //check Origin Location
-    if(origin.equals("") || origin == null){
+    if(origin.equals("") || origin == null || (!(placesNotOperable.containsKey(origin)) && !(locations.containsKey(origin))) ){
       BadLocationFault badLocation = new BadLocationFault();
       badLocation.setLocation(origin);
       throw new BadLocationFault_Exception("Requested a Job with a origin location unknown", badLocation);
     }
       
     //check Destination Location
-    if(destination.equals("") || destination == null) {
+    if(destination.equals("") || destination == null || (!(placesNotOperable.containsKey(destination)) && !(locations.containsKey(destination))) ){
       BadLocationFault badLocation = new BadLocationFault();
       badLocation.setLocation(destination);
       throw new BadLocationFault_Exception("Requested a Job with a destination location unknown", badLocation);
     }
     
     //doesn't operate in region 
-    if (!(locations.containsKey(origin)) || !(locations.containsKey(destination))) {
+    if (placesNotOperable.containsKey(origin) || placesNotOperable.containsKey(destination)) {
     return null;
     }
     
@@ -194,7 +207,7 @@ public class TransporterPort implements TransporterPortType {
 
   @Override
   public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
-    String[] parts = id.split(".");
+    String[] parts = id.split("\\.");
     int i = Integer.parseInt(parts[parts.length - 1]);
     
     if(jobs.get(i) == null){
@@ -217,12 +230,13 @@ public class TransporterPort implements TransporterPortType {
 
   @Override
   public JobView jobStatus(String id) {
-    String[] parts = id.split(".");
-    int i = Integer.parseInt(parts[parts.length - 1]);
-
-    if(jobs.get(i) == null) {
+    String[] parts = id.split("\\.");
+    
+    if(!id.matches("UpaTransporter[1-9]*.[0-9]*$")) {
       return null;
     }
+    
+    int i = Integer.parseInt(parts[parts.length - 1]);
     
     //TODO see if this is safe or is needed to use other object
     return jobs.get(i);

@@ -213,10 +213,6 @@ public class BrokerPort implements BrokerPortType {
 	}
     transports = new ArrayList<TransportView>();
   }
-   
-  public List<TransporterPortType> getTransporters(){
-    return this.transporters;
-  }
   
   public List<TransportView> getTransports() {
     return transports;
