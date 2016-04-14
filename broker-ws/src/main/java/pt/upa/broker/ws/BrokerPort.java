@@ -95,6 +95,7 @@ public class BrokerPort implements BrokerPortType {
 	  TransporterPortType bestTransporter = null;
 	  Map<JobView, TransporterPortType> badJobs = new HashMap<JobView, TransporterPortType>();
 	  Map<JobView, TransportView> badTransports = new HashMap<JobView, TransportView>();
+	  boolean higher_price = false;
 	  
 	  for(TransporterPortType transporter: transporters){
 		  try {
@@ -105,23 +106,23 @@ public class BrokerPort implements BrokerPortType {
 			  badTransports.put(job, transportView);
 			  
 			  transportView.setState(TransportStateView.BUDGETED);
-			  if (job == null) continue; // TODO should I tell that it is rejected?
+			  if (job == null) continue;
 			  if (job.getJobPrice() <= bestPrice){
 				  bestJob = job;
 				  bestTransporter = transporter;
 				  bestPrice = bestJob.getJobPrice();
-			  }
-		  } catch (BadLocationFault_Exception e) {
-			  // TODO do what?
+			  } else { higher_price = true; }
+		  } catch (BadLocationFault_Exception e) { 
+			  System.out.println(e.getMessage());
 		  } catch (BadPriceFault_Exception e) {
-			  // TODO do what?
-			  //InvalidPriceFault fault = new InvalidPriceFault();
-			  //fault.setPrice(price);
-			  //throw new InvalidPriceFault_Exception("Invalid Price Exception. ", fault);
+			  System.out.println(e.getMessage());
 		  }
 	  }
-	  // TODO which exception?
-	  if (bestJob == null) throw new UnavailableTransportFault_Exception(destination, null);
+	  
+	  UnavailableTransportFault fault1 = new UnavailableTransportFault();
+	  if (bestJob == null) throw new UnavailableTransportFault_Exception("No transporter for the job", fault1);
+	  UnavailableTransportPriceFault fault2 = new UnavailableTransportPriceFault();
+	  if (higher_price) throw new UnavailableTransportPriceFault_Exception("Uknavailable Price.", fault2);
 	  badJobs.remove(bestJob);
 	  
 	  try {
