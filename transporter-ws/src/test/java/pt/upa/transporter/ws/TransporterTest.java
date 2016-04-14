@@ -3,7 +3,7 @@ package pt.upa.transporter.ws;
 import org.junit.Test;
 import java.util.concurrent.TimeUnit;
 
-import pt.upa.transporter.ws.JobView;
+//import pt.upa.transporter.ws.JobView;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

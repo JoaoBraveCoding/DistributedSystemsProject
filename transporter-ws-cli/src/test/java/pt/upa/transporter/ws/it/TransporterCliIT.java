@@ -1,7 +1,12 @@
 package pt.upa.transporter.ws.it;
 
 import org.junit.*;
+
+import pt.upa.transporter.ws.cli.TransporterClient;
+
 import static org.junit.Assert.*;
+
+import javax.xml.registry.JAXRException;
 
 /**
  *  Integration Test example
@@ -9,7 +14,7 @@ import static org.junit.Assert.*;
  *  Invoked by Maven in the "verify" life-cycle phase
  *  Should invoke "live" remote servers 
  */
-public class ExampleIT {
+public class TransporterCliIT {
 
     // static members
 
@@ -18,7 +23,6 @@ public class ExampleIT {
 
     @BeforeClass
     public static void oneTimeSetUp() {
-
     }
 
     @AfterClass
@@ -33,7 +37,8 @@ public class ExampleIT {
     // initialization and clean-up for each test
 
     @Before
-    public void setUp() {
+    public void setUp() throws JAXRException {
+      TransporterClient tc = new TransporterClient("uddiURL", "UpaT");//TODO re check
     }
 
     @After
