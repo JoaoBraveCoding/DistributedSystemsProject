@@ -172,7 +172,6 @@ public class TransporterPort implements TransporterPortType {
       }
       else{
         //price even but transporter odd
-        //TODO Does the price have to be between price and 100?
         return rn.nextInt(price) + price;
       }
     }
@@ -211,8 +210,8 @@ public class TransporterPort implements TransporterPortType {
     int i = Integer.parseInt(parts[parts.length - 1]);
     
     if(jobs.get(i) == null){
-      //TODO throw exception
-      return null;
+      BadJobFault faultInfo = new BadJobFault();
+      throw new BadJobFault_Exception("Job od Recived from Broker unknown", faultInfo);
     }
     
     if(accept){

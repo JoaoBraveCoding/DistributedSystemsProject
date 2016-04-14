@@ -98,6 +98,7 @@ public class BrokerTest extends AbstractBrokerTest{
        tw.getId().equals(expected.getId()) &&
        tw.getOrigin().equals(expected.getOrigin()) &&
        tw.getPrice() == expected.getPrice() &&
+       tw.getTransporterCompany() == expected.getTransporterCompany() &&
        tw.getState().equals(expected.getState())){
       return true;
     }
