@@ -73,10 +73,10 @@ public class BrokerClient {
     return port.ping(string);
   }
   
-  public void requestTransport(String origin, String destination, int price) throws 
+  public String requestTransport(String origin, String destination, int price) throws 
   InvalidPriceFault_Exception, UnavailableTransportFault_Exception, 
   UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception{
-    port.requestTransport(origin, destination, price);
+    return port.requestTransport(origin, destination, price);
   }
   
   public  TransportView viewTransport(String id) throws UnknownTransportFault_Exception{

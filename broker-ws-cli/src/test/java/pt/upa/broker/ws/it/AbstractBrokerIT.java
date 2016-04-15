@@ -6,6 +6,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import pt.upa.broker.ws.cli.BrokerClient;
+import pt.upa.broker.ws.exception.UnknownServiceException;
 
 public abstract class AbstractBrokerIT {
   protected static BrokerClient client;
@@ -14,7 +15,7 @@ public abstract class AbstractBrokerIT {
 //one-time initialization and clean-up
 
   @BeforeClass
-  public static void oneTimeSetUp() throws JAXRException {
+  public static void oneTimeSetUp() throws JAXRException, UnknownServiceException {
       client = new BrokerClient(uddiURL, wsName);
   }
 
