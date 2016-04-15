@@ -14,14 +14,16 @@ import pt.upa.broker.ws.UnavailableTransportPriceFault_Exception;
 import pt.upa.broker.ws.UnknownLocationFault_Exception;
 import pt.upa.broker.ws.UnknownTransportFault_Exception;
 
-public class viewTransportIT extends AbstractBrokerIT{
+public class ViewTransportIT extends AbstractBrokerIT{
  
   @Test
   public void broker_viewTransport_success() throws UnknownTransportFault_Exception, InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
-	  String id = "";
-		id = client.requestTransport("Lisboa", "Coimbra", 49);
+	String id = "";
+	id = client.requestTransport("Lisboa", "Coimbra", 49);
 	System.out.println("TEST: " + id);
 	TransportView transport = client.viewTransport(id);
-    assertEquals(transport.getState(), TransportStateView.BOOKED);
+	System.out.println(transport.getState());
+    assertEquals(TransportStateView.BOOKED, transport.getState());
+  
   }
 }
