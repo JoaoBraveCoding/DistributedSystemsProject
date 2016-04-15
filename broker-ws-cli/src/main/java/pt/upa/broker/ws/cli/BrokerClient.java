@@ -2,6 +2,7 @@ package pt.upa.broker.ws.cli;
 
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.registry.JAXRException;
@@ -72,13 +73,22 @@ public class BrokerClient {
     return port.ping(string);
   }
   
-  public String requestTransport(String origin, String destination, int price) throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception{
-	return port.requestTransport(origin, destination, price);
-
+  public void requestTransport(String origin, String destination, int price) throws 
+  InvalidPriceFault_Exception, UnavailableTransportFault_Exception, 
+  UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception{
+    port.requestTransport(origin, destination, price);
   }
-
-  public TransportView viewTransport(String id) throws UnknownTransportFault_Exception {
-	return port.viewTransport(id);
+  
+  public  TransportView viewTransport(String id) throws UnknownTransportFault_Exception{
+    return port.viewTransport(id);
+  }
+  
+  public  List<TransportView> listTransports(){
+    return port.listTransports();
+  }
+  
+  public void clearTransports(){
+    port.clearTransports();
   }
   
 }

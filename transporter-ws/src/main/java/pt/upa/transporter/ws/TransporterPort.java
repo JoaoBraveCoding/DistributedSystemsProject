@@ -124,14 +124,14 @@ public class TransporterPort implements TransporterPortType {
     }
     
     //check Origin Location
-    if(origin.equals("") || origin == null || (!(placesNotOperable.containsKey(origin)) && !(locations.containsKey(origin))) ){
+    if(origin == null ||origin.equals("") || (!(placesNotOperable.containsKey(origin)) && !(locations.containsKey(origin))) ){
       BadLocationFault badLocation = new BadLocationFault();
       badLocation.setLocation(origin);
       throw new BadLocationFault_Exception("Requested a Job with a origin location unknown", badLocation);
     }
       
     //check Destination Location
-    if(destination.equals("") || destination == null || (!(placesNotOperable.containsKey(destination)) && !(locations.containsKey(destination))) ){
+    if(destination == null || destination.equals("") || (!(placesNotOperable.containsKey(destination)) && !(locations.containsKey(destination))) ){
       BadLocationFault badLocation = new BadLocationFault();
       badLocation.setLocation(destination);
       throw new BadLocationFault_Exception("Requested a Job with a destination location unknown", badLocation);
@@ -209,7 +209,7 @@ public class TransporterPort implements TransporterPortType {
     String[] parts = id.split("\\.");
     int i = Integer.parseInt(parts[parts.length - 1]);
     
-    if(jobs.get(i) == null){
+    if(i > jobs.size()){
       BadJobFault faultInfo = new BadJobFault();
       throw new BadJobFault_Exception("Job od Recived from Broker unknown", faultInfo);
     }
@@ -251,7 +251,11 @@ public class TransporterPort implements TransporterPortType {
   @Override
   public void clearJobs() {
     jobs = new ArrayList<JobView>();
-    identifierCounter = 0;
+    identifierCounter = -1;
+  }
+  
+  public int getIdentifier(){
+    return identifierCounter;
   }
   
   public void stopTimer(){
