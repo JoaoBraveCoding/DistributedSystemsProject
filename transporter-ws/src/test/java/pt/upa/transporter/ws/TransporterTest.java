@@ -43,12 +43,6 @@ public class TransporterTest extends AbstractTransporterTest{
   @Test
   public void good_job_request() throws BadLocationFault_Exception, BadPriceFault_Exception{
     JobView jv2 = transporter.requestJob("Beja", "Faro", 49);
-    System.out.println(jv2.getCompanyName() + " - " + jobViews.get(0).getCompanyName());
-    System.out.println(jv2.getJobDestination() + " - " + jobViews.get(0).getJobDestination());
-    System.out.println(jv2.getJobIdentifier() + " - " + jobViews.get(0).getJobIdentifier());
-    System.out.println(jv2.getJobOrigin() + " - " + jobViews.get(0).getJobOrigin());
-    System.out.println(jv2.getJobPrice() + " - " + jobViews.get(0).getJobPrice());
-    System.out.println(jv2.getJobState() + " - " + jobViews.get(0).getJobState());
     assertTrue(viewsEquals(jv2, 0));
   }
 
@@ -98,8 +92,16 @@ public class TransporterTest extends AbstractTransporterTest{
     assertTrue(jv3.getJobPrice() < 5 && jv3.getJobPrice() >= 0);
   }
   
-  //TODO add odd number price request
-  //TODO add negative price request
+  @Test
+  public void odd_number_price_request() throws BadLocationFault_Exception, BadPriceFault_Exception{
+    JobView jv3 = transporter.requestJob("Beja", "Faro", 51);
+    assertTrue(jv3.getJobPrice() < 51);
+  }
+
+  @Test (expected = BadPriceFault_Exception.class)
+  public void negative_number_price_request() throws BadLocationFault_Exception, BadPriceFault_Exception{
+    transporter.requestJob("Beja", "Faro",  -50);
+  }
   
   @Test
   public void decide_job_accept() throws BadJobFault_Exception, BadLocationFault_Exception, BadPriceFault_Exception{
