@@ -115,7 +115,7 @@ public class TransporterPort implements TransporterPortType {
       throws BadLocationFault_Exception, BadPriceFault_Exception {
     
     JobView budgetJob;
-    
+    System.out.println(price);
     //check Price
     if(price < 0){
       BadPriceFault badPrice = new BadPriceFault();

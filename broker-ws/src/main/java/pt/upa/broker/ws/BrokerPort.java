@@ -33,6 +33,8 @@ public class BrokerPort implements BrokerPortType {
 
   private List<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
   private List<TransportView>    	transports   = new ArrayList<TransportView>();
+  private Map<TransportView, JobView> transports_jobs = new HashMap<TransportView, JobView>();
+  private Map<TransportView, TransporterPortType> transports_transporters = new HashMap<TransportView, TransporterPortType>();
   private Map<String, String> places = new HashMap<String, String>();
   private int identifierCounter = 0;
   
@@ -91,9 +93,12 @@ public class BrokerPort implements BrokerPortType {
 
 	  // find best job
 	  TransportView transportView = null;
+	  // best price will never be higher than proposed max
 	  int bestPrice = price;
 	  JobView bestJob = null;
 	  TransporterPortType bestTransporter = null;
+	  
+	  // for not chosen jobs
 	  Map<JobView, TransporterPortType> badJobs = new HashMap<JobView, TransporterPortType>();
 	  Map<JobView, TransportView> badTransports = new HashMap<JobView, TransportView>();
 	  boolean higher_price = false;
@@ -102,34 +107,55 @@ public class BrokerPort implements BrokerPortType {
 		  try {
 			  // create transport for each transporter
 			  transportView = createTransport(origin, destination, price, bestTransporter);
+			  // request a job
 			  JobView job = transporter.requestJob(origin, destination, price);
+			  // add to arrays the new information job-transport
+			  transports_jobs.put(transportView, job); // class attribute
+			  transports_transporters.put(transportView, transporter);
+			  // function locals
 			  badJobs.put(job, transporter);
 			  badTransports.put(job, transportView);
 			  
+			  // set transport state to BUDGETED
 			  transportView.setState(TransportStateView.BUDGETED);
 			  if (job == null) continue;
+			  // check if price is better that it was before
 			  if (job.getJobPrice() <= bestPrice){
 				  bestJob = job;
 				  bestTransporter = transporter;
 				  bestPrice = bestJob.getJobPrice();
-			  } else { higher_price = true; }
+			  } else { higher_price = true; } // needed to throw UnavailableTransportPrice
 		  } catch (BadLocationFault_Exception e) { 
 			  System.out.println(e.getMessage());
 		  } catch (BadPriceFault_Exception e) {
 			  System.out.println(e.getMessage());
 		  }
 	  }
-	  
+	  // no job to fulfill client's needs
 	  UnavailableTransportFault fault1 = new UnavailableTransportFault();
 	  if (bestJob == null) throw new UnavailableTransportFault_Exception("No transporter for the job", fault1);
+	  
+	  // the price was always higher than the maximum allowed 
 	  UnavailableTransportPriceFault fault2 = new UnavailableTransportPriceFault();
 	  if (higher_price) throw new UnavailableTransportPriceFault_Exception("Uknavailable Price.", fault2);
+	  
+	  // remove bestjob from badjobs
 	  badJobs.remove(bestJob);
+
+	  // update non chosen jobs status to failed
+	  for(JobView j : badJobs.keySet()){
+		  badTransports.get(j).setState(TransportStateView.FAILED);
+	  }
 	  
 	  try {
-		 JobView stateJob = bestTransporter.decideJob(bestJob.getJobIdentifier(), true);
+		  // tell transporter to accept bestJob offer
+		  JobView stateJob = bestTransporter.decideJob(bestJob.getJobIdentifier(), true);
+		 
+		  // update transport state based on transporters answer
 		 if(stateJob.getJobState() == JobStateView.ACCEPTED){
-			 badTransports.get(bestJob).setState(TransportStateView.BOOKED);;
+			 badTransports.get(bestJob).setState(TransportStateView.BOOKED);
+		 } else {
+			 badTransports.get(bestJob).setState(TransportStateView.FAILED);
 		 }
 		 
 		 for(JobView j: badJobs.keySet()){
@@ -139,8 +165,8 @@ public class BrokerPort implements BrokerPortType {
 			 }
 		 }
 	  } catch (BadJobFault_Exception e) {
-		// TODO do what?
 	  }
+	  System.out.println("RETRIEVING ID " + transportView.getId());
 	  return transportView.getId();
   }
   
@@ -194,9 +220,24 @@ public class BrokerPort implements BrokerPortType {
 
   @Override
   public TransportView viewTransport(String id) throws UnknownTransportFault_Exception {
+	  JobView corresponding_job = null;
+	  TransporterPortType corresponding_company = null;
 	for(TransportView transport: transports){
-		if(transport.getId() == id) return transport;
+		// get right transport
+		if(transport.getId().equals(id)) {
+			corresponding_job = this.transports_jobs.get(transport);
+			corresponding_company = this.transports_transporters.get(transport);
+			
+			corresponding_job.setJobState(corresponding_company.jobStatus(corresponding_job.getJobIdentifier()).getJobState());
+		}
+		
+		if(corresponding_job.getJobState() == JobStateView.HEADING) transport.setState(TransportStateView.HEADING);
+		if(corresponding_job.getJobState() == JobStateView.ONGOING) transport.setState(TransportStateView.ONGOING);
+		if(corresponding_job.getJobState() == JobStateView.COMPLETED) transport.setState(TransportStateView.COMPLETED);
+		
+		return transport;
 	}
+	
 	UnknownTransportFault fault = new UnknownTransportFault();
 	fault.setId(id);
     throw new UnknownTransportFault_Exception("Transport not found. ", fault);

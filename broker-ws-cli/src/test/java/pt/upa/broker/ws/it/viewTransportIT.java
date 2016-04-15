@@ -24,5 +24,4 @@ public class viewTransportIT extends AbstractBrokerIT{
 	TransportView transport = client.viewTransport(id);
     assertEquals(transport.getState(), TransportStateView.BOOKED);
   }
-  
 }
