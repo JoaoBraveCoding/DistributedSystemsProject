@@ -156,13 +156,12 @@ public class BrokerPort implements BrokerPortType {
 		  JobView stateJob = bestTransporter.decideJob(bestJob.getJobIdentifier(), true);
 		 
 
-		badTransports.get(bestJob).setState(TransportStateView.BOOKED);
+		  badTransports.get(bestJob).setState(TransportStateView.BOOKED);
 
 		 
 		 for(JobView j: badJobs.keySet()){
 			 stateJob = badJobs.get(j).decideJob(j.getJobIdentifier(), false);
-
-			badTransports.get(bestJob).setState(TransportStateView.FAILED);;
+			 badTransports.get(j).setState(TransportStateView.FAILED);;
 
 		 }
 	  } catch (BadJobFault_Exception e) {
@@ -263,14 +262,11 @@ public class BrokerPort implements BrokerPortType {
 
   @Override
   public void clearTransports() {
+  identifierCounter = 0;
 	for(TransporterPortType transporter: transporters){
 		transporter.clearJobs();
 	}
     transports = new ArrayList<TransportView>();
-  }
-   
-  public List<TransporterPortType> getTransporters(){
-    return this.transporters;
   }
   
   public List<TransportView> getTransports() {

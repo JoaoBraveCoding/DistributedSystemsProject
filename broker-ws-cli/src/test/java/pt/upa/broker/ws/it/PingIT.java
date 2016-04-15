@@ -12,4 +12,9 @@ public class PingIT extends AbstractBrokerIT{
     assertEquals("Pong Client!", result);
   }
 
+  protected void populate() {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

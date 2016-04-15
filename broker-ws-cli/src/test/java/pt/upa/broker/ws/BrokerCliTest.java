@@ -15,10 +15,10 @@ import pt.upa.broker.ws.cli.BrokerClient;
 
 public class BrokerCliTest extends AbstractBrokerCliTest {
 
-  @Override
+  @Override 
   protected void populate() {
     // TODO Auto-generated method stub
-    
+   
   }
   
   private static final String uddiURL = "http://localhost:9090";

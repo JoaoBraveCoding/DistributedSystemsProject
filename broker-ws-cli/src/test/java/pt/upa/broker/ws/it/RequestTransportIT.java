@@ -37,4 +37,10 @@ public class RequestTransportIT extends AbstractBrokerIT{
 		String id = client.requestTransport("Coimbra","Lisboa", 49);
 		System.out.println("TRANSPORT ID: " + id);
 	  }
+
+  protected void populate() {
+    client.clearTransports();
+    // TODO Auto-generated method stub
+    
+  }
 }

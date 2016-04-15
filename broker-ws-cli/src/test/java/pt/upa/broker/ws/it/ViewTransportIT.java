@@ -26,4 +26,9 @@ public class ViewTransportIT extends AbstractBrokerIT{
     assertEquals(TransportStateView.BOOKED, transport.getState());
   
   }
+
+  protected void populate() {
+    client.clearTransports();
+    // TODO Auto-generated method stub
+  }
 }
