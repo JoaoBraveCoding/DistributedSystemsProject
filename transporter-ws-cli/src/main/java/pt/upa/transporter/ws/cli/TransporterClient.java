@@ -58,8 +58,8 @@ public class TransporterClient {
     return port.ping(string);
   }
 
-  public void requestJob(String origin, String destination, int price) throws BadLocationFault_Exception, BadPriceFault_Exception {
-    port.requestJob(origin, destination, price);    
+  public JobView requestJob(String origin, String destination, int price) throws BadLocationFault_Exception, BadPriceFault_Exception {
+    return port.requestJob(origin, destination, price);    
   }
 
   public List<JobView> listJobs() {

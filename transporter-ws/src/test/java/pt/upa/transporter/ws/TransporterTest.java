@@ -53,6 +53,16 @@ public class TransporterTest extends AbstractTransporterTest{
   }
 
   @Test (expected = BadLocationFault_Exception.class)
+  public void null_origin() throws BadLocationFault_Exception, BadPriceFault_Exception{
+    transporter.requestJob(null, "Faro", 50);
+  }
+  
+  @Test (expected = BadLocationFault_Exception.class)
+  public void null_destination() throws BadLocationFault_Exception, BadPriceFault_Exception{
+    transporter.requestJob("Beja", null, 50);
+  }
+  
+  @Test (expected = BadLocationFault_Exception.class)
   public void job_request_with_empty_origin() throws BadLocationFault_Exception, 
   BadPriceFault_Exception{
     transporter.requestJob("", "Beja", 50);
@@ -93,25 +103,45 @@ public class TransporterTest extends AbstractTransporterTest{
   }
   
   @Test
-  public void odd_number_price_request() throws BadLocationFault_Exception, BadPriceFault_Exception{
+  public void odd_number_price_even_transporter() throws BadLocationFault_Exception, BadPriceFault_Exception{
+    JobView jv3 = transporter2.requestJob("Porto","Braga", 51);
+    assertTrue(jv3.getJobPrice() > 51);
+  }
+  
+  @Test
+  public void odd_number_price_odd_transporter_request() throws BadLocationFault_Exception, 
+  BadPriceFault_Exception{
     JobView jv3 = transporter.requestJob("Beja", "Faro", 51);
     assertTrue(jv3.getJobPrice() < 51);
   }
 
   @Test (expected = BadPriceFault_Exception.class)
-  public void negative_number_price_request() throws BadLocationFault_Exception, BadPriceFault_Exception{
+  public void negative_number_price_request() throws BadLocationFault_Exception, 
+  BadPriceFault_Exception{
     transporter.requestJob("Beja", "Faro",  -50);
   }
   
   @Test
-  public void decide_job_accept() throws BadJobFault_Exception, BadLocationFault_Exception, BadPriceFault_Exception{
+  public void decide_job_accept() throws BadJobFault_Exception, BadLocationFault_Exception, 
+  BadPriceFault_Exception{
     transporter.requestJob("Beja", "Faro", 50);
     transporter.decideJob("UpaTransporter1.0", true);
     assertTrue(viewsEquals(transporter.listJobs().get(0), 2));
   }
   
+  @Test (expected = NumberFormatException.class)
+  public void decide_job_nonsense() throws BadJobFault_Exception{
+    transporter.decideJob("nonsense", true);
+  }
+  
+  @Test (expected = BadJobFault_Exception.class)
+  public void decide_job_non_existing_job() throws BadJobFault_Exception{
+    transporter.decideJob("nonsense1.5", true);
+  }
+  
   @Test
-  public void decide_job_decline() throws BadJobFault_Exception, BadLocationFault_Exception, BadPriceFault_Exception{
+  public void decide_job_decline() throws BadJobFault_Exception, BadLocationFault_Exception, 
+  BadPriceFault_Exception{
     transporter.requestJob("Beja", "Faro", 50);
     transporter.decideJob("UpaTransporter1.0", false);
     assertTrue(viewsEquals(transporter.listJobs().get(0), 3));
@@ -121,6 +151,7 @@ public class TransporterTest extends AbstractTransporterTest{
   public void job_Status() throws BadLocationFault_Exception, BadPriceFault_Exception{
     transporter.requestJob("Beja", "Faro", 50);
     JobView jv4 = transporter.jobStatus("UpaTransporter1.0");
+    System.out.println(jv4.getJobState());
     assertTrue(viewsEquals(jv4, 0));
   }
   
@@ -146,14 +177,8 @@ public class TransporterTest extends AbstractTransporterTest{
   }
   
   @Test
-  public void completed_job() throws InterruptedException, BadJobFault_Exception, BadLocationFault_Exception, BadPriceFault_Exception{
-    /*
-    TransporterPort.ChangeState cs = transporter.new ChangeState(jobViews.get(0), JobStateView.HEADING);
-    cs.run();
-    TimeUnit.SECONDS.sleep(12);
-    System.out.println(jobViews.get(0).getJobState());
-    assertTrue(jobViews.get(0).getJobState() == JobStateView.COMPLETED);
-    */
+  public void completed_job() throws InterruptedException, BadJobFault_Exception, 
+  BadLocationFault_Exception, BadPriceFault_Exception{
     transporter.requestJob("Beja", "Faro", 50);
     transporter.decideJob("UpaTransporter1.0", true);
     TimeUnit.SECONDS.sleep(12);
