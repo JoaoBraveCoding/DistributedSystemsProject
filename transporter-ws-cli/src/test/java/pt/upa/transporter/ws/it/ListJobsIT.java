@@ -21,6 +21,7 @@ public class ListJobsIT extends AbstractTransporterIT{
   }
   
   public void populate(){
+    client.clearJobs();
     JobView jvw = createJobView("UpaTransporter1", "UpaTransporter1.0", "Beja", "Faro", 50, 5); //PROPOSED
     jobViews.add(jvw); //0
   }

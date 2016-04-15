@@ -72,7 +72,6 @@ public abstract class AbstractTransporterIT {
        jv.getCompanyName().equals(expected.getCompanyName()) &&
        jv.getJobIdentifier().equals(expected.getJobIdentifier()) &&
        jv.getJobOrigin().equals(expected.getJobOrigin()) &&
-       expected.getJobPrice() > 10 && expected.getJobPrice() <= 100 &&
        jv.getJobState().equals(expected.getJobState())){
       return true;
     }
