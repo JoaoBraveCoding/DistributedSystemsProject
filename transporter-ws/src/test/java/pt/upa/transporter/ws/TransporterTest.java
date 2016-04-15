@@ -128,12 +128,17 @@ public class TransporterTest extends AbstractTransporterTest{
   }
   
   @Test
-  public void completed_job() throws InterruptedException{
+  public void completed_job() throws InterruptedException, BadJobFault_Exception{
+    /*
     TransporterPort.ChangeState cs = transporter.new ChangeState(jobViews.get(0), JobStateView.HEADING);
     cs.run();
     TimeUnit.SECONDS.sleep(12);
     System.out.println(jobViews.get(0).getJobState());
     assertTrue(jobViews.get(0).getJobState() == JobStateView.COMPLETED);
+    */
+    transporter.decideJob("UpaTransporter1.0", true);
+    TimeUnit.SECONDS.sleep(12);
+    assertTrue(transporter.listJobs().get(0).getJobState() == JobStateView.COMPLETED);
   }
   
   private boolean viewsEquals(JobView jv, int i){
