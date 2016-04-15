@@ -35,7 +35,6 @@ public class RequestTransportIT extends AbstractBrokerIT{
 	@Test
 	  public void broker_viewTransport_success() throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception  {
 		String id = client.requestTransport("Coimbra","Lisboa", 49);
-		System.out.println("TRANSPORT ID: " + id);
 	  }
 
   protected void populate() {

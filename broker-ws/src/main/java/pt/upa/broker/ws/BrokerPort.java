@@ -123,7 +123,6 @@ public class BrokerPort implements BrokerPortType {
 			  // check if price is better that it was before
 			  if (job.getJobPrice() <= bestPrice){
 				  bestJob = job;
-				  System.out.println(bestJob.getCompanyName() + bestJob.getJobPrice());
 				  bestTransporter = transporter;
 				  bestPrice = bestJob.getJobPrice();
 			  } else { higher_price = true; } // needed to throw UnavailableTransportPrice
@@ -139,7 +138,6 @@ public class BrokerPort implements BrokerPortType {
 	  
 	  // the price was always higher than the maximum allowed 
 	  UnavailableTransportPriceFault fault2 = new UnavailableTransportPriceFault();
-	  System.out.println("higher price:" + higher_price + "bestJob:" + bestJob);
 	  if (higher_price && bestJob == null) throw new UnavailableTransportPriceFault_Exception("Uknavailable Price.", fault2);
 	  
 	  // remove bestjob from badjobs
@@ -166,7 +164,6 @@ public class BrokerPort implements BrokerPortType {
 		 }
 	  } catch (BadJobFault_Exception e) {
 	  }
-	  System.out.println("RETRIEVING ID " + transportView.getId());
 	  return transportView.getId();
   }
   
@@ -222,8 +219,6 @@ public class BrokerPort implements BrokerPortType {
   public TransportView viewTransport(String id) throws UnknownTransportFault_Exception {
 	  JobView corresponding_job = null;
 	  TransporterPortType corresponding_company = null;
-	System.out.println("GETTING TRANSPORT" + id);
-	System.out.println("TRANSPORTS IDS: ");
 	  
 	for(TransportView transport: transports){
 		// get right transport
@@ -232,13 +227,9 @@ public class BrokerPort implements BrokerPortType {
 			corresponding_job = this.transports_jobs.get(transport);
 			corresponding_company = this.transports_transporters.get(transport);
 			
-			System.out.println("TESTE VIEW TRANSPORT: "+ corresponding_job.getCompanyName() + " " +  corresponding_company.toString() );
 			
 			String identifier = corresponding_job.getJobIdentifier();
-			System.out.println(identifier);
 			JobView job_status = corresponding_company.jobStatus(identifier);
-			System.out.println(job_status.getCompanyName());
-			System.out.println(job_status.getJobState());
 			corresponding_job.setJobState(job_status.getJobState());
 		
 		

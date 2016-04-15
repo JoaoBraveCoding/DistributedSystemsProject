@@ -115,7 +115,6 @@ public class TransporterPort implements TransporterPortType {
       throws BadLocationFault_Exception, BadPriceFault_Exception {
     
     JobView budgetJob;
-    System.out.println(price);
     //check Price
     if(price < 0){
       BadPriceFault badPrice = new BadPriceFault();
@@ -210,7 +209,6 @@ public class TransporterPort implements TransporterPortType {
   public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
     String[] parts = id.split("\\.");
     int i = Integer.parseInt(parts[parts.length - 1]);
-    System.out.println("CHaNging state " + accept + " " + id);
     if(i > jobs.size()){
       BadJobFault faultInfo = new BadJobFault();
       throw new BadJobFault_Exception("Job od Recived from Broker unknown", faultInfo);
