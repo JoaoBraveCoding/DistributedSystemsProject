@@ -71,6 +71,7 @@ mvn exec:java
 ```
 
 [2] Construir **cliente** e executar testes
+These tests require two transporters to be running at the same time  
 
 ```
 cd transporter-ws-cli

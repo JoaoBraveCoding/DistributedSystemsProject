@@ -76,12 +76,6 @@ public class BrokerTest extends AbstractBrokerTest{
       broker.requestTransport("Viseu", "Lisboa", -12);
   }
   
-  @Test
-  public void broker_viewTransport_success() throws UnknownTransportFault_Exception{
-    TransportView tw = broker.viewTransport("Job1");
-    assertEquals(true, viewsEquals(tw, 0));
-  }
-  
   @Test (expected = UnknownTransportFault_Exception.class)
   public void broker_viewTransport_unknownTransport() throws UnknownTransportFault_Exception{
     broker.viewTransport("Job34");
