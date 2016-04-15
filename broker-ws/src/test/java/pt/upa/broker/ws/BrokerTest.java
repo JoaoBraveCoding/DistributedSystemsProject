@@ -7,11 +7,18 @@ import java.util.List;
 
 import org.junit.Test;
 
+import mockit.Expectations;
+import mockit.Mocked;
+import mockit.Verifications;
+import pt.upa.transporter.ws.JobView;
+import pt.upa.transporter.ws.TransporterPortType;
+
 
 public class BrokerTest extends AbstractBrokerTest{
   
   BrokerPort broker;
   List<TransportView> transportViews = new ArrayList<TransportView>();
+
   @Override
   protected void populate() {
     broker = new BrokerPort();
@@ -36,7 +43,7 @@ public class BrokerTest extends AbstractBrokerTest{
   @Test
   public void broker_ping_success() {
       String result = broker.ping("Test");
-      assertEquals("Pong Test! (0/0) transporters online/transporters", result);
+      assertEquals("Pong Test!", result);
   }
   
   @Test (expected = UnknownLocationFault_Exception.class)

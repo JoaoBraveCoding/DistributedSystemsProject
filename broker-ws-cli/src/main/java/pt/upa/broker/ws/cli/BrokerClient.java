@@ -16,32 +16,45 @@ import pt.upa.broker.ws.UnavailableTransportFault_Exception;
 import pt.upa.broker.ws.UnavailableTransportPriceFault_Exception;
 import pt.upa.broker.ws.UnknownLocationFault_Exception;
 import pt.upa.broker.ws.UnknownTransportFault_Exception;
+import pt.upa.broker.ws.exception.UnknownServiceException;
 
 public class BrokerClient {
   
   private UDDINaming uddiNaming;
   private String endpointAddress;
   private BrokerPortType port;
+  private String uddiURL;
   
-  public BrokerClient(String uddiURL, String name) throws JAXRException{
+  
+  public BrokerClient(String uddiURL, String name) throws JAXRException, UnknownServiceException{
+    this.uddiURL = uddiURL;
     setUDDINaming(uddiURL);
     setEndpointAddresss(name);
     createPort();
   }
 
-  private void setUDDINaming(String uddiURL) throws JAXRException {
-    this.uddiNaming = new UDDINaming(uddiURL);
+  private void setUDDINaming(String uddiURL) throws JAXRException, UnknownServiceException {
+    try{
+      this.uddiNaming = new UDDINaming(uddiURL);
+    } catch (JAXRException e) {UnknownServiceException ex = new UnknownServiceException("Client failed lookup on UDDI at " + uddiURL + "!");
+                                ex.initCause(new JAXRException());
+                                throw ex;}
   }
   
-  private void setEndpointAddresss(String name) throws JAXRException {
-    System.out.printf("Looking for '%s'%n", name);
-    endpointAddress = uddiNaming.lookup(name);    
-    if (endpointAddress == null) {
-      System.out.println("Not found!");
-      //TODO Throw service not found exception
-    } else {
-      System.out.printf("Found %s%n", endpointAddress);
-    }
+  private void setEndpointAddresss(String name) throws JAXRException, UnknownServiceException {
+    try{
+      System.out.printf("Looking for '%s'%n", name);
+      endpointAddress = uddiNaming.lookup(name);    
+      if (endpointAddress == null) {
+        System.out.println("Not found!");
+        throw new UnknownServiceException("Service with name " + name + " not found on UDDI at " + 
+                  uddiURL);
+      } else {
+        System.out.printf("Found %s%n", endpointAddress);
+      }
+    } catch (JAXRException e) {UnknownServiceException ex = new UnknownServiceException("Client failed lookup on UDDI at " + uddiURL + "!");
+                                ex.initCause(new JAXRException());
+                                throw ex;}
   }
   
   private void createPort(){
