@@ -74,7 +74,8 @@ public class BrokerPort implements BrokerPortType {
         counter++;
       }
     }
-    return "Pong " + name + "! " + "(" + counter + "/" + transporters.size() + ")" + " transporters online/transporters";
+    System.out.println("Pong " + name + "! " + "(" + counter + "/" + transporters.size() + ")" + " transporters online/transporters");
+    return "Pong " + name + "!";
   }
 
   @Override
@@ -140,7 +141,7 @@ public class BrokerPort implements BrokerPortType {
 	  } catch (BadJobFault_Exception e) {
 		// TODO do what?
 	  }
-	  return null;
+	  return transportView.getId();
   }
   
   private TransportView createTransport(String origin, String destination, int price, TransporterPortType transporter) {

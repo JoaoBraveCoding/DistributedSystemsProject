@@ -9,7 +9,7 @@ public class PingIT extends AbstractBrokerIT{
   @Test
   public void broker_ping_success() {
     String result = client.ping("Client");
-    assertEquals("Pong Client! (2/2) transporters online/transporters", result);
+    assertEquals("Pong Client!", result);
   }
 
 }
