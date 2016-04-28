@@ -13,6 +13,9 @@ public abstract class AbstractBrokerIT {
   private static String wsName  = "UpaBroker";
   private static String uddiURL = "http://localhost:9090";
 //one-time initialization and clean-up
+  
+  protected abstract void populate(); // each test adds its own data
+
 
   @BeforeClass
   public static void oneTimeSetUp() throws JAXRException, UnknownServiceException {

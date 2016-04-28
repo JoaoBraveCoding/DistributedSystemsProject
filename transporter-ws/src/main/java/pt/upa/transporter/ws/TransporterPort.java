@@ -277,5 +277,4 @@ public class TransporterPort implements TransporterPortType {
 	public void stopTimer(){
 		timer.cancel();
 	}
-
 }
