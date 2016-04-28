@@ -44,6 +44,7 @@ public class BrokerPort implements BrokerPortType {
 	  places.put("Porto", "North");
 	  places.put("Braga", "North");
 	  places.put("Viana do Castelo", "North");
+	  places.put("Vila Real", "North");
 	  places.put("Bragança", "North");
 	  
 	  places.put("Lisboa", "Center");
@@ -58,7 +59,9 @@ public class BrokerPort implements BrokerPortType {
 	  places.put("Setúbal", "South");
 	  places.put("Évora", "South");
 	  places.put("Portalegre", "South");
+	  places.put("Beja", "South");
 	  places.put("Faro", "South");
+	  
   }
   
 
@@ -96,6 +99,7 @@ public class BrokerPort implements BrokerPortType {
 	  // best price will never be higher than proposed max
 	  int bestPrice = price;
 	  JobView bestJob = null;
+	  TransportView bestTransportView = null;
 	  TransporterPortType bestTransporter = null;
 	  
 	  // for not chosen jobs
@@ -103,12 +107,22 @@ public class BrokerPort implements BrokerPortType {
 	  Map<JobView, TransportView> badTransports = new HashMap<JobView, TransportView>();
 	  boolean higher_price = false;
 	  
+	  transportView = createTransport(origin, destination, -1, null);
+	  
 	  for(TransporterPortType transporter: transporters){
 		  try {
-			  // create transport for each transporter
-			  transportView = createTransport(origin, destination, price, bestTransporter);
+			  
+			  
 			  // request a job
 			  JobView job = transporter.requestJob(origin, destination, price);
+			  
+			  if(job==null){
+			    continue;
+			  }
+			  
+			// create transport for each transporter
+			  
+			  
 			  // add to arrays the new information job-transport
 			  transports_jobs.put(transportView, job); // class attribute
 			  transports_transporters.put(transportView, transporter);
@@ -119,10 +133,11 @@ public class BrokerPort implements BrokerPortType {
 			  
 			  // set transport state to BUDGETED
 			  transportView.setState(TransportStateView.BUDGETED);
-			  if (job == null) continue;
+
 			  // check if price is better that it was before
 			  if (job.getJobPrice() <= bestPrice){
 				  bestJob = job;
+				  bestTransportView = transportView;
 				  bestTransporter = transporter;
 				  bestPrice = bestJob.getJobPrice();
 			  } else { higher_price = true; } // needed to throw UnavailableTransportPrice
@@ -134,7 +149,7 @@ public class BrokerPort implements BrokerPortType {
 	  }
 	  // no job to fulfill client's needs
 	  UnavailableTransportFault fault1 = new UnavailableTransportFault();
-	  if (bestJob == null) throw new UnavailableTransportFault_Exception("No transporter for the job", fault1);
+	  if (!higher_price && bestJob == null) throw new UnavailableTransportFault_Exception("No transporter for the job", fault1);
 	  
 	  // the price was always higher than the maximum allowed 
 	  UnavailableTransportPriceFault fault2 = new UnavailableTransportPriceFault();
@@ -164,7 +179,13 @@ public class BrokerPort implements BrokerPortType {
 		 }
 	  } catch (BadJobFault_Exception e) {
 	  }
-	  return transportView.getId();
+	  
+	  transportView.setPrice(bestJob.getJobPrice());
+	  transportView.setTransporterCompany(getTransporterPortTypeName(bestTransporter));
+	  
+	  transports.add(transportView);
+	  System.out.println("Choosing price: " + bestJob.getJobPrice());
+	  return bestTransportView.getId();
   }
   
   private TransportView createTransport(String origin, String destination, int price, TransporterPortType transporter) {
@@ -177,7 +198,6 @@ public class BrokerPort implements BrokerPortType {
 	transport.setTransporterCompany(getTransporterPortTypeName(transporter));
 	transport.setState(TransportStateView.REQUESTED);
 	
-	transports.add(transport);
 	return transport;
 }
 
@@ -248,6 +268,7 @@ public class BrokerPort implements BrokerPortType {
 
   @Override
   public List<TransportView> listTransports() {
+
     return transports;
   }
 

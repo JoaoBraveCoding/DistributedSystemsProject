@@ -114,6 +114,8 @@ public class TransporterPort implements TransporterPortType {
 	public JobView requestJob(String origin, String destination, int price)
 			throws BadLocationFault_Exception, BadPriceFault_Exception {
 
+	  System.out.println(origin + " destination: " + destination + " price: " + price);
+	  
 		JobView budgetJob;
 		System.out.println(price);
 		//check Price
@@ -139,6 +141,8 @@ public class TransporterPort implements TransporterPortType {
 
 		//doesn't operate in region 
 		if (placesNotOperable.containsKey(origin) || placesNotOperable.containsKey(destination)) {
+		  
+		  System.out.println("I do not work in this conditions.");
 			return null;
 		}
 
@@ -149,7 +153,7 @@ public class TransporterPort implements TransporterPortType {
 		budgetJob = createNewJob(origin, destination);
 
 		if(price <= 10) {
-			budgetJob.setJobPrice(rn.nextInt(price));
+			budgetJob.setJobPrice(rn.nextInt(price) + 1);
 			jobs.add(budgetJob);
 			System.out.println("Proposing: "+ budgetJob.getJobPrice());
 			return budgetJob;
