@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.jws.HandlerChain;
 import javax.jws.WebService;
 
 
@@ -20,6 +21,7 @@ import javax.jws.WebService;
 		targetNamespace="http://ws.transporter.upa.pt/",
 		serviceName="TransporterService"
 		)
+@HandlerChain(file = "/handler-chain.xml")
 public class TransporterPort implements TransporterPortType {
 
 	private int    identifierCounter;
