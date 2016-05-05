@@ -62,10 +62,10 @@
             <artifactId>transporter-ws-cli</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!-- JAX-WS handlers -->
+        <!-- crypto -->
         <dependency>
             <groupId>example</groupId>
-            <artifactId>ws-handlers</artifactId>
+            <artifactId>crypto</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

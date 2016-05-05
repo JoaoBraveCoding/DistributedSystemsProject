@@ -61,10 +61,10 @@
             <artifactId>uddi-naming</artifactId>
             <version>1.0</version>
         </dependency>
-        <!-- JAX-WS handlers -->
+        <!-- crypto -->
         <dependency>
             <groupId>example</groupId>
-            <artifactId>ws-handlers</artifactId>
+            <artifactId>crypto</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
