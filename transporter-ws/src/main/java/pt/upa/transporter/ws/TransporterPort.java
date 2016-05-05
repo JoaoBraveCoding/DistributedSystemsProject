@@ -174,7 +174,7 @@ public class TransporterPort implements TransporterPortType {
 		if(price % 2 == 0) {
 			if(name.matches("UpaTransporter[1-9]*[02468]$")) {
 				//transporter and price even
-				return rn.nextInt(price) + 1;
+				return rn.nextInt(price);
 			}
 			else{
 				//price even but transporter odd
@@ -189,7 +189,7 @@ public class TransporterPort implements TransporterPortType {
 			}
 			else {
 				//transporter and price odd
-				return rn.nextInt(price) + 1;
+				return rn.nextInt(price);
 			}
 		}
 	}
