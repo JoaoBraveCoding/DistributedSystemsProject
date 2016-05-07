@@ -7,6 +7,7 @@ import java.security.Key;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -74,6 +75,19 @@ public class SecurityFunctions {
     return keyFacPriv.generatePrivate(privSpec);
   }
 
+  /** auxiliary method to calculate digest from text and cipher it */
+  public static byte[] makeDigitalSignature(byte[] bytes, PrivateKey privateKey) throws Exception {
+
+    // get a signature object using the SHA-1 and RSA combo
+    // and sign the plain-text with the private key
+    Signature sig = Signature.getInstance("SHA1WithRSA");
+    sig.initSign(privateKey);
+    sig.update(bytes);
+    byte[] signature = sig.sign();
+
+    return signature;
+  }
+  
   /**
    * auxiliary method to calculate new digest from text and compare it to the
    * to deciphered digest

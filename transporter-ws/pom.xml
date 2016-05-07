@@ -61,10 +61,10 @@
             <artifactId>uddi-naming</artifactId>
             <version>1.0</version>
         </dependency>
-        <!-- crypto -->
+         <!-- ws-handlers-aux -->
         <dependency>
-            <groupId>example</groupId>
-            <artifactId>crypto</artifactId>
+            <groupId>pt.upa.a44</groupId>
+            <artifactId>ws-handlers-aux</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

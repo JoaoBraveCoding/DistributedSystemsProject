@@ -24,7 +24,6 @@ import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import pt.upa.ws.SecurityFunctions;
-import example.crypto.X509DigitalSignature;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
@@ -86,7 +85,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         //encrypt digest = signature
 
         PrivateKey privKey = (PrivateKey) SecurityFunctions.getKey("../../../../../../../../keys/UpaBrokerPriv.key");
-        byte[] signature = X509DigitalSignature.makeDigitalSignature(digest, privKey);
+        byte[] signature = SecurityFunctions.makeDigitalSignature(digest, privKey);
 
         // add header
         SOAPHeader sh = se.getHeader();
