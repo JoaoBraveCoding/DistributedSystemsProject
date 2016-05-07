@@ -1,4 +1,4 @@
-package pt.upa.broker.ws.handler;
+package pt.upa.transporter.ws.handler;
 
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -25,8 +25,6 @@ import pt.upa.ws.SecurityFunctions;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
-import pt.upa.ca.ws.cli.CaClient;
-
 /**
  *  This SOAPHandler shows how to set/get values from headers in
  *  inbound/outbound SOAP messages.
@@ -52,13 +50,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   public boolean handleMessage(SOAPMessageContext smc) {
     System.out.println("HeaderHandler: Handling message.");
 
-    CaClient client = null;
-    try {
-      client = new CaClient ("http://localhost:9090","UpaCa");
-    } catch (Exception e1) {
-      e1.printStackTrace();
-    }
-    
     Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
     try {
@@ -112,12 +103,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         SOAPHeaderElement nonceElement = sh.addHeaderElement(nonceName);
         nonceElement.addTextNode(textNonce);
 
-        //get certificate from CA
-        String textBrokerCertificate = client.requestCertificate("UpaBroker");
-
-        Name certificateName = se.createName("certificate", "e", "urn:upa");
-        SOAPHeaderElement certificateElement = sh.addHeaderElement(certificateName);
-        certificateElement.addTextNode(textBrokerCertificate);
 
 
       } else {
@@ -192,7 +177,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         String transporterText = transporterElement.getValue();
 
         //get certificate from CA
-        String transporterCertificateText = client.requestCertificate(transporterText);
+        String transporterCertificateText = null;//client.requestCertificate(transporterText);
         byte[] transporterCertificate = parseBase64Binary(transporterCertificateText);
 
         PublicKey pubKeyCA = SecurityFunctions.getPubKey("keys/CaPub.key");
