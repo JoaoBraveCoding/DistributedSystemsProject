@@ -9,6 +9,7 @@ import javax.xml.registry.JAXRException;
 import javax.xml.ws.BindingProvider;
 
 import pt.upa.ca.ws.CaService;
+import pt.upa.ca.ws.Exception_Exception;
 import pt.upa.ca.ws.CaPortType;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
@@ -66,6 +67,15 @@ public class CaClient {
   
   public String ping(String string) {
     return port.ping(string);
+  }
+
+  public String requestCertificate(String string) {
+    try {
+      return port.requestCertificate(string);
+    } catch (Exception_Exception e) {
+      e.printStackTrace();
+    }
+    return null;
   }
   
 }

@@ -17,7 +17,8 @@ public class CaClientApplication {
     CaClient client = new CaClient(args[0], args[1]);
     
     System.out.println("Remote call ...");
-    String result = client.ping("Client");
+    //String result = client.ping("Client");
+    String result = client.requestCertificate("UpaBroker");
     System.out.println(result);
   }
 }

@@ -23,19 +23,21 @@ public class CaPort implements CaPortType {
   }
 
   @Override
-  public String requestCertificate(String name) throws Exception {
+  public String requestCertificate(String name){
     if(name == null){
       throw new NullValueReceivedException();
     }
-    
-    //Read keys from files
-    byte[] serverPubKey = SecurityFunctions.readFile("../../../../../../../key/" + name + "Pub.key");
-    PrivateKey caPrivKey    = (PrivateKey) SecurityFunctions.getKey("../../../../../../../key/CaPriv.key");
+    try {
+      //Read keys from files
+      byte[] serverPubKey = SecurityFunctions.readFile("keys/" + name + "Pub.key");
+      PrivateKey caPrivKey    = (PrivateKey) SecurityFunctions.getKey("keys/CaPriv.key");
+  
+      //Generate the certificate
+      byte[] certificate = SecurityFunctions.makeDigitalSignature(serverPubKey, caPrivKey);
+      return printBase64Binary(certificate);
 
-    //Generate the certificate
-    byte[] certificate = SecurityFunctions.makeDigitalSignature(serverPubKey, caPrivKey);
-    
-    return printBase64Binary(certificate);
+    } catch (Exception e) { e.printStackTrace(); }
+    return null;
   }
 
  
