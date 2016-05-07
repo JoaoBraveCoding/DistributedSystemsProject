@@ -56,10 +56,16 @@
             <artifactId>uddi-naming</artifactId>
             <version>1.0</version>
         </dependency>
-         <!-- transporter-ws-cli ask if it's okay -->
+        <!-- transporter-ws-cli -->
         <dependency>
             <groupId>pt.upa.a44</groupId>
             <artifactId>transporter-ws-cli</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- ca-ws-cli -->
+        <dependency>
+            <groupId>pt.upa.a44</groupId>
+            <artifactId>ca-ws-cli</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <!-- ws-handlers-aux -->

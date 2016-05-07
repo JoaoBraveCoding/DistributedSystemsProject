@@ -1,16 +1,16 @@
 package pt.upa.broker.ws.handler;
 
-
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.cert.Certificate;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
+import javax.xml.registry.JAXRException;
 import javax.xml.soap.Name;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPElement;
@@ -19,13 +19,20 @@ import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import pt.upa.ws.SecurityFunctions;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
+import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
+
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import pt.upa.ca.ws.CaPortType;
+import pt.upa.ca.ws.CaService;
+import pt.upa.ca.ws.exception.UnknownServiceException;
 
 /**
  *  This SOAPHandler shows how to set/get values from headers in
@@ -41,6 +48,11 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
   public static final String CONTEXT_PROPERTY = "my.property";
+  
+  private CaPortType caPort;
+  private String uddiURL;
+  private String endpointAddress;
+  private UDDINaming uddiNaming;
 
   //
   // Handler interface methods
@@ -50,8 +62,18 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   }
 
   public boolean handleMessage(SOAPMessageContext smc) {
-    System.out.println("AddHeaderHandler: Handling message.");
+    System.out.println("HeaderHandler: Handling message.");
 
+    try {
+      setUDDINaming("http://localhost:9090");
+      setEndpointAddresss("UpaCa");
+    } catch (JAXRException e1) {
+      e1.printStackTrace();
+    } catch (UnknownServiceException e1) {
+      e1.printStackTrace();
+    }
+    createPort();
+    
     Boolean outboundElement = (Boolean) smc
         .get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
@@ -108,10 +130,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         nonceElement.addTextNode(textNonce);
 
         //get certificate from CA boiii TODO
-        Certificate brokerCertificate = null;//CaPort.requestCertificate("UpaBroker");
-
-        //turn certificate into text
-        String textBrokerCertificate = printBase64Binary(brokerCertificate.getEncoded());
+        String textBrokerCertificate = null;//caPort.requestCertificate("UpaBroker");
 
         Name certificateName = se.createName("certificate", "e", "urn:upa");
         SOAPHeaderElement certificateElement = sh.addHeaderElement(certificateName);
@@ -192,7 +211,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         String transporterText = transporterElement.getTextContent();
 
         //get certificate from CA boiii TODO
-        String transporterCertificateText = null;//CaPort.requestCertificate("transporterText");
+        String transporterCertificateText = null;//caPort.requestCertificate(transporterText);
         byte[] transporterCertificate = parseBase64Binary(transporterCertificateText);
 
         PublicKey pubKeyCA = (PublicKey) SecurityFunctions.getKey("../../../../../../../../keys/CaPub.key");
@@ -231,5 +250,42 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
   public void close(MessageContext messageContext) {
   }
+  
+  private void setUDDINaming(String uddiURL) throws JAXRException, UnknownServiceException {
+    try{
+      this.uddiNaming = new UDDINaming(uddiURL);
+    } catch (JAXRException e) {UnknownServiceException ex = new UnknownServiceException("Client failed lookup on UDDI at " + uddiURL + "!");
+                                ex.initCause(new JAXRException());
+                                throw ex;}
+  }
+  
+  private void setEndpointAddresss(String name) throws JAXRException, UnknownServiceException {
+    try{
+      System.out.printf("Looking for '%s'%n", name);
+      endpointAddress = uddiNaming.lookup(name);    
+      if (endpointAddress == null) {
+        System.out.println("Not found!");
+        throw new UnknownServiceException("Service with name " + name + " not found on UDDI at " + 
+                  uddiURL);
+      } else {
+        System.out.printf("Found %s%n", endpointAddress);
+      }
+    } catch (JAXRException e) {UnknownServiceException ex = new UnknownServiceException("Client failed lookup on UDDI at " + uddiURL + "!");
+                                ex.initCause(new JAXRException());
+                                throw ex;}
+  }
+
+  
+  private void createPort(){
+    System.out.println("Creating stub ...");
+    CaService service = new CaService();
+    caPort = service.getCaPort();
+
+    System.out.println("Setting endpoint address ...");
+    BindingProvider bindingProvider = (BindingProvider) caPort;
+    Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
+  }
+  
 
 }

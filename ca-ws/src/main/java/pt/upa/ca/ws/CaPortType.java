@@ -6,4 +6,5 @@ import javax.jws.WebService;
 public interface CaPortType {
 
   String ping(String name);
+  String requestCertificate(String name) throws Exception;
 }
