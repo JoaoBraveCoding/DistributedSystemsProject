@@ -5,6 +5,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -25,13 +26,14 @@ import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import pt.upa.ws.SecurityFunctions;
-import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
+import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import pt.upa.ca.ws.CaPortType;
 import pt.upa.ca.ws.CaService;
+import pt.upa.ca.ws.cli.CaClient;
 import pt.upa.ca.ws.exception.UnknownServiceException;
 
 /**
@@ -73,9 +75,15 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
       e1.printStackTrace();
     }
     createPort();
+    CaClient client = null;
+    try {
+      client = new CaClient ("http://localhost:9090","UpaCa");
+    } catch (Exception e1) {
+      e1.printStackTrace();
+    }
+
     
-    Boolean outboundElement = (Boolean) smc
-        .get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+    Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
     try {
       if (outboundElement.booleanValue()) {
@@ -94,19 +102,21 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
           return true;
         }
         SOAPElement element = (SOAPElement) it.next();
-        String plainText = element.getValue();
+        String plainText = element.getTextContent();
+        System.out.println(plainText + " Texto na msg ao inicio");
 
         //get random for nonce
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte nonce[] = new byte[16];
         random.nextBytes(nonce);
-
+        
+        System.out.println(nonce + " nonce que fomos obter  " + nonce.length);
+       
         //make digest
         byte[] digest = SecurityFunctions.digestBroker(plainText, nonce);
 
         //encrypt digest = signature
-
-        PrivateKey privKey = (PrivateKey) SecurityFunctions.getKey("../../../../../../../../keys/UpaBrokerPriv.key");
+        PrivateKey privKey = SecurityFunctions.getPrivKey("keys/UpaBrokerPriv.key");
         byte[] signature = SecurityFunctions.makeDigitalSignature(digest, privKey);
 
         // add header
@@ -124,13 +134,14 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
         //turn signature into text
         String textNonce = printBase64Binary(nonce);
-
+        System.out.println(textNonce + "  nonce em string");
+        
         Name nonceName = se.createName("nonce", "e", "urn:upa");
         SOAPHeaderElement nonceElement = sh.addHeaderElement(nonceName);
         nonceElement.addTextNode(textNonce);
 
         //get certificate from CA boiii TODO
-        String textBrokerCertificate = null;//caPort.requestCertificate("UpaBroker");
+        String textBrokerCertificate = client.requestCertificate("UpaBroker");
 
         Name certificateName = se.createName("certificate", "e", "urn:upa");
         SOAPHeaderElement certificateElement = sh.addHeaderElement(certificateName);
@@ -211,10 +222,10 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         String transporterText = transporterElement.getTextContent();
 
         //get certificate from CA boiii TODO
-        String transporterCertificateText = null;//caPort.requestCertificate(transporterText);
+        String transporterCertificateText = client.requestCertificate(transporterText);
         byte[] transporterCertificate = parseBase64Binary(transporterCertificateText);
 
-        PublicKey pubKeyCA = (PublicKey) SecurityFunctions.getKey("../../../../../../../../keys/CaPub.key");
+        PublicKey pubKeyCA = SecurityFunctions.getPubKey("keys/CaPub.key");
         byte[] transporterPublicKey = SecurityFunctions.decryptMessage(pubKeyCA, transporterCertificate);
         PublicKey pubKeyTransporter = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(transporterPublicKey));
 
@@ -237,6 +248,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
     } catch (Exception e) {
       System.out.print("Caught exception in handleMessage: ");
       System.out.println(e);
+      e.printStackTrace();
       System.out.println("Continue normal processing...");
     }
 
@@ -251,28 +263,20 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   public void close(MessageContext messageContext) {
   }
   
-  private void setUDDINaming(String uddiURL) throws JAXRException, UnknownServiceException {
-    try{
-      this.uddiNaming = new UDDINaming(uddiURL);
-    } catch (JAXRException e) {UnknownServiceException ex = new UnknownServiceException("Client failed lookup on UDDI at " + uddiURL + "!");
-                                ex.initCause(new JAXRException());
-                                throw ex;}
+ private void setUDDINaming(String uddiURL) throws JAXRException, UnknownServiceException {
+    this.uddiNaming = new UDDINaming(uddiURL);
   }
   
   private void setEndpointAddresss(String name) throws JAXRException, UnknownServiceException {
-    try{
-      System.out.printf("Looking for '%s'%n", name);
-      endpointAddress = uddiNaming.lookup(name);    
-      if (endpointAddress == null) {
-        System.out.println("Not found!");
-        throw new UnknownServiceException("Service with name " + name + " not found on UDDI at " + 
-                  uddiURL);
-      } else {
-        System.out.printf("Found %s%n", endpointAddress);
-      }
-    } catch (JAXRException e) {UnknownServiceException ex = new UnknownServiceException("Client failed lookup on UDDI at " + uddiURL + "!");
-                                ex.initCause(new JAXRException());
-                                throw ex;}
+    System.out.printf("Looking for '%s'%n", name);
+    endpointAddress = uddiNaming.lookup(name);    
+    if (endpointAddress == null) {
+      System.out.println("Not found!");
+      throw new UnknownServiceException("Service with name " + name + " not found on UDDI at " + 
+                uddiURL);
+    } else {
+      System.out.printf("Found %s%n", endpointAddress);
+    }
   }
 
   

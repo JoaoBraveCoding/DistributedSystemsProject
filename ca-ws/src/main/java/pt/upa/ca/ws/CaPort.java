@@ -30,7 +30,7 @@ public class CaPort implements CaPortType {
     try {
       //Read keys from files
       byte[] serverPubKey = SecurityFunctions.readFile("keys/" + name + "Pub.key");
-      PrivateKey caPrivKey    = (PrivateKey) SecurityFunctions.getKey("keys/CaPriv.key");
+      PrivateKey caPrivKey    = (PrivateKey) SecurityFunctions.getPrivKey("keys/CaPriv.key");
   
       //Generate the certificate
       byte[] certificate = SecurityFunctions.makeDigitalSignature(serverPubKey, caPrivKey);

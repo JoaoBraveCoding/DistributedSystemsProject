@@ -12,7 +12,7 @@ public abstract class AbstractBrokerIT {
   protected static BrokerClient client;
   private static String wsName  = "UpaBroker";
   private static String uddiURL = "http://localhost:9090";
-//one-time initialization and clean-up
+ //one-time initialization and clean-up
   
   protected abstract void populate(); // each test adds its own data
 
@@ -23,7 +23,7 @@ public abstract class AbstractBrokerIT {
   }
 
   @AfterClass
-  public static void oneTimeTearDown() {
+  public static void oneTimeTearDown() { 
       client = null;
   }
 

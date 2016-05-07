@@ -12,17 +12,21 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+
+import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 
 import javax.crypto.Cipher;
+
+import org.junit.validator.PublicClassValidator;
 
 public class SecurityFunctions {
   
   public static byte[] digestBroker(String msg, byte[] nonce) throws NoSuchAlgorithmException{
     // get a message digest object using the specified algorithm
     MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-    System.out.println(messageDigest.getProvider().getInfo());
 
-    System.out.println("Computing digest ...");
+    System.out.println("Computing digestBroker ...");
     byte[] plainBytes = msg.getBytes();
     byte[] plainPlusNonce = new byte[nonce.length + plainBytes.length];
     
@@ -38,7 +42,7 @@ public class SecurityFunctions {
     MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
     System.out.println(messageDigest.getProvider().getInfo());
 
-    System.out.println("Computing digest ...");
+    System.out.println("Computing digestTransporter ...");
     byte[] plainBytes = msg.getBytes();
     byte[] nameBytes = TransporterName.getBytes();
     byte[] plainPlusNonceAndName = new byte[nonce.length + plainBytes.length + nameBytes.length];
@@ -68,13 +72,20 @@ public class SecurityFunctions {
     return cipher.doFinal(message);
   }
 
-  public static Key getKey(String path) throws Exception{
+  public static PrivateKey getPrivKey(String path) throws Exception{
     byte[] privEncoded = readFile(path);
     PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privEncoded);
     KeyFactory keyFacPriv = KeyFactory.getInstance("RSA");
     return keyFacPriv.generatePrivate(privSpec);
   }
 
+  public static PublicKey getPubKey(String path) throws Exception{
+    byte[] pubEncoded = readFile(path);
+    X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubEncoded);
+    KeyFactory keyFacPub = KeyFactory.getInstance("RSA");
+    return keyFacPub.generatePublic(pubSpec);
+  }
+  
   /** auxiliary method to calculate digest from text and cipher it */
   public static byte[] makeDigitalSignature(byte[] bytes, PrivateKey privateKey) throws Exception {
 

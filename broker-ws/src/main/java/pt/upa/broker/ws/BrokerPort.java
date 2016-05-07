@@ -13,7 +13,8 @@ import javax.xml.registry.JAXRException;
 import javax.xml.ws.BindingProvider;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
-
+import pt.upa.ca.ws.CaPortType;
+import pt.upa.ca.ws.CaService;
 import pt.upa.transporter.ws.BadJobFault_Exception;
 import pt.upa.transporter.ws.BadLocationFault_Exception;
 import pt.upa.transporter.ws.BadPriceFault_Exception;
@@ -39,6 +40,7 @@ public class BrokerPort implements BrokerPortType {
   private Map<TransportView, TransporterPortType> transports_transporters = new HashMap<TransportView, TransporterPortType>();
   private Map<String, String> places = new HashMap<String, String>();
   private int identifierCounter = 0;
+  private CaPortType ca;
   
   public BrokerPort() {
 	  super();
@@ -301,6 +303,17 @@ public class BrokerPort implements BrokerPortType {
     requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
 
     transporters.add(port);
+  }
+  
+  public void addCa(String caEndpointAddress){
+    System.out.println("Creating stub ...");
+    CaService service = new CaService();
+    ca = service.getCaPort();
+
+    System.out.println("Setting endpoint address ...");
+    BindingProvider bindingProvider = (BindingProvider) ca;
+    Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, caEndpointAddress);
   }
   
 }
