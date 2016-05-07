@@ -5,7 +5,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -51,11 +50,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
   public static final String CONTEXT_PROPERTY = "my.property";
   
-  private CaPortType caPort;
-  private String uddiURL;
-  private String endpointAddress;
-  private UDDINaming uddiNaming;
-
   //
   // Handler interface methods
   //
@@ -66,22 +60,12 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   public boolean handleMessage(SOAPMessageContext smc) {
     System.out.println("HeaderHandler: Handling message.");
 
-    try {
-      setUDDINaming("http://localhost:9090");
-      setEndpointAddresss("UpaCa");
-    } catch (JAXRException e1) {
-      e1.printStackTrace();
-    } catch (UnknownServiceException e1) {
-      e1.printStackTrace();
-    }
-    createPort();
     CaClient client = null;
     try {
       client = new CaClient ("http://localhost:9090","UpaCa");
     } catch (Exception e1) {
       e1.printStackTrace();
     }
-
     
     Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
@@ -103,15 +87,12 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         }
         SOAPElement element = (SOAPElement) it.next();
         String plainText = element.getTextContent();
-        System.out.println(plainText + " Texto na msg ao inicio");
 
         //get random for nonce
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte nonce[] = new byte[16];
         random.nextBytes(nonce);
-        
-        System.out.println(nonce + " nonce que fomos obter  " + nonce.length);
-       
+               
         //make digest
         byte[] digest = SecurityFunctions.digestBroker(plainText, nonce);
 
@@ -134,13 +115,12 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
         //turn signature into text
         String textNonce = printBase64Binary(nonce);
-        System.out.println(textNonce + "  nonce em string");
         
         Name nonceName = se.createName("nonce", "e", "urn:upa");
         SOAPHeaderElement nonceElement = sh.addHeaderElement(nonceName);
         nonceElement.addTextNode(textNonce);
 
-        //get certificate from CA boiii TODO
+        //get certificate from CA
         String textBrokerCertificate = client.requestCertificate("UpaBroker");
 
         Name certificateName = se.createName("certificate", "e", "urn:upa");
@@ -165,7 +145,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
           return true;
         }
         SOAPElement element = (SOAPElement) it.next();
-        String bodyText = element.getValue();                
+        String bodyText = element.getTextContent();                
 
         // check header
         if (sh == null) {
@@ -194,7 +174,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         Name nonceName = se.createName("nonce", "e", "urn:upa");
         it = sh.getChildElements(nonceName);
 
-        // check header element
         if (!it.hasNext()) {
           System.out.println("Nonce element not found.");
           return false;
@@ -211,7 +190,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         Name transporterName = se.createName("transporter", "e", "urn:upa");
         it = sh.getChildElements(transporterName);
 
-        // check header element
         if (!it.hasNext()) {
           System.out.println("Transporter name not found.");
           return false;
@@ -219,9 +197,9 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         SOAPElement transporterElement = (SOAPElement) it.next();
 
         // get header element value
-        String transporterText = transporterElement.getTextContent();
+        String transporterText = transporterElement.getValue();
 
-        //get certificate from CA boiii TODO
+        //get certificate from CA
         String transporterCertificateText = client.requestCertificate(transporterText);
         byte[] transporterCertificate = parseBase64Binary(transporterCertificateText);
 
@@ -236,13 +214,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
           System.out.println("Wrong digital signature.");
           return false;
         }
-
-
-//        TODO Dunno what this is
-//        // put header in a property context
-//        smc.put(CONTEXT_PROPERTY, value);
-//        // set property scope to application client/server class can access it
-//        smc.setScope(CONTEXT_PROPERTY, Scope.APPLICATION);
 
       }
     } catch (Exception e) {
@@ -262,34 +233,5 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
   public void close(MessageContext messageContext) {
   }
-  
- private void setUDDINaming(String uddiURL) throws JAXRException, UnknownServiceException {
-    this.uddiNaming = new UDDINaming(uddiURL);
-  }
-  
-  private void setEndpointAddresss(String name) throws JAXRException, UnknownServiceException {
-    System.out.printf("Looking for '%s'%n", name);
-    endpointAddress = uddiNaming.lookup(name);    
-    if (endpointAddress == null) {
-      System.out.println("Not found!");
-      throw new UnknownServiceException("Service with name " + name + " not found on UDDI at " + 
-                uddiURL);
-    } else {
-      System.out.printf("Found %s%n", endpointAddress);
-    }
-  }
-
-  
-  private void createPort(){
-    System.out.println("Creating stub ...");
-    CaService service = new CaService();
-    caPort = service.getCaPort();
-
-    System.out.println("Setting endpoint address ...");
-    BindingProvider bindingProvider = (BindingProvider) caPort;
-    Map<String, Object> requestContext = bindingProvider.getRequestContext();
-    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
-  }
-  
-
+ 
 }

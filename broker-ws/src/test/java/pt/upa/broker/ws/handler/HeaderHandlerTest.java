@@ -24,7 +24,6 @@ import mockit.Mocked;
 import mockit.StrictExpectations;
 import pt.upa.ws.SecurityFunctions;
 
-import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 /**
@@ -41,7 +40,6 @@ public class HeaderHandlerTest extends AbstractHandlerTest {
 
         // Preparation code not specific to JMockit, if any.
         final String soapText = RT_SOAP_REQUEST;
-        // System.out.println(soapText);
 
         final SOAPMessage soapMessage = byteArrayToSOAPMessage(soapText.getBytes());
         final Boolean soapOutbound = true;
@@ -92,7 +90,6 @@ public class HeaderHandlerTest extends AbstractHandlerTest {
         element = (SOAPElement) it.next();
         valueString = element.getTextContent();
         byte[] nonce = parseBase64Binary(valueString);
-        System.out.println(printBase64Binary(nonce) + "  " + nonce.length);
         
         //obtaining plaintext
         SOAPBody sb = soapEnvelope.getBody();                
@@ -101,9 +98,6 @@ public class HeaderHandlerTest extends AbstractHandlerTest {
         
         element = (SOAPElement) it.next();
         String msg = element.getTextContent();
-        
-        System.out.println(element.getTextContent() + "   msggggggggggg");
-
         
         //digest msg + nonce
         byte[] bytes = SecurityFunctions.digestBroker(msg, nonce);
