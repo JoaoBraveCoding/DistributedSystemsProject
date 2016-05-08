@@ -61,10 +61,16 @@
             <artifactId>uddi-naming</artifactId>
             <version>1.0</version>
         </dependency>
-         <!-- ws-handlers-aux -->
+        <!-- ws-handlers-aux -->
         <dependency>
             <groupId>pt.upa.a44</groupId>
             <artifactId>ws-handlers-aux</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- ws-handlers-aux -->
+        <dependency>
+            <groupId>example</groupId>
+            <artifactId>ws-handlers</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

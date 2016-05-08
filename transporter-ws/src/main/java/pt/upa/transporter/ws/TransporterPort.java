@@ -25,7 +25,7 @@ import javax.xml.ws.handler.MessageContext;
 		targetNamespace="http://ws.transporter.upa.pt/",
 		serviceName="TransporterService"
 		)
-//@HandlerChain(file = "/handler-chain.xml")
+@HandlerChain(file = "/handler-chain.xml")
 public class TransporterPort implements TransporterPortType {
 
 	private int    identifierCounter;
