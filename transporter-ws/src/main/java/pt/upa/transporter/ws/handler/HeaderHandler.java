@@ -96,10 +96,10 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         byte[] digest = SecurityFunctions.digestTransporter(plainText, nonce, transporterNameText);
         
         //encrypt digest = signature
-        PrivateKey privKey = SecurityFunctions.getPrivKey("keys/UpaBrokerPriv.key");
+        PrivateKey privKey = SecurityFunctions.getPrivKey("keys/"+ transporterNameText +"Priv.key");
         byte[] signature = SecurityFunctions.makeDigitalSignature(digest, privKey);
 
-        
+
 
         //turn signature into text
         String textSignature = printBase64Binary(signature);
@@ -109,7 +109,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         SOAPHeaderElement elementHeader = sh.addHeaderElement(signatureName);
         elementHeader.addTextNode(textSignature);
 
-        //turn signature into text
+        //turn nonce into text
         String textNonce = printBase64Binary(nonce);
         
         Name nonceName = se.createName("nonce", "e", "urn:upa");
@@ -174,9 +174,9 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         //change nonce to byte
         byte[] nonce = parseBase64Binary(nonceText);
 //--
-     // get signature element
+        // get certificate element
         Name certificate = se.createName("certificate", "e", "urn:upa");
-        it = sh.getChildElements(signatureName);
+        it = sh.getChildElements(certificate);
 
         // check header element
         if (!it.hasNext()) {
@@ -186,7 +186,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         SOAPElement certificateElement = (SOAPElement) it.next();
 
         // get header element value
-        String certificateText = signatureElement.getValue();
+        String certificateText = certificateElement.getValue();
         
         //get BrokerPubKey from certificate
         byte[] certificateBin = parseBase64Binary(certificateText);
