@@ -10,6 +10,7 @@ import java.util.TimerTask;
 
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
+import javax.xml.ws.BindingProvider;
 
 
 
@@ -66,6 +67,12 @@ public class TransporterPort implements TransporterPortType {
 
 	public TransporterPort(String name) {
 		this.name = name;
+		
+		//have no idea about this..
+    BindingProvider bindingProvider = (BindingProvider) this;
+    Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    requestContext.put("transporterName", name);
+
 		identifierCounter = -1;
 		locations.put("Lisboa", "Center");
 		locations.put("Leiria", "Center");
