@@ -39,8 +39,6 @@ import pt.upa.ca.ws.cli.CaClient;
  *  that can be accessed by other handlers or by the application.
  */
 public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
-
-  public static final String CONTEXT_PROPERTY = "my.property";
   
   //
   // Handler interface methods
@@ -63,6 +61,10 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
     try {
       if (outboundElement.booleanValue()) {
+        if (smc.HTTP_RESPONSE_CODE != null){
+          System.out.println("Resposta não intressa");
+          return true;
+        }
         System.out.println("Writing header in outbound SOAP message...");
 
         // get SOAP envelope
@@ -118,10 +120,15 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         Name certificateName = se.createName("certificate", "e", "urn:upa");
         SOAPHeaderElement certificateElement = sh.addHeaderElement(certificateName);
         certificateElement.addTextNode(textBrokerCertificate);
-
+        System.out.println("Message sent");
 
       } else {
+        if (smc.HTTP_REQUEST_METHOD != null){
+          System.out.println("Pedido não intressa");
+          return true;
+        }
         System.out.println("Reading header in inbound SOAP message...");
+
 
         // get SOAP envelope header
         SOAPMessage msg = smc.getMessage();

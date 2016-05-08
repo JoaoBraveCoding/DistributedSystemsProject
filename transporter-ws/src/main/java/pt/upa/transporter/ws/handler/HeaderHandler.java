@@ -118,7 +118,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         
       } else {
         System.out.println("Reading header in inbound SOAP message...");
-
+        
         // get SOAP envelope header
         SOAPMessage msg = smc.getMessage();
         SOAPPart sp = msg.getSOAPPart();

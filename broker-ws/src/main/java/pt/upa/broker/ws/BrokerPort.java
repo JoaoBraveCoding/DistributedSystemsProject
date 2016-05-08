@@ -31,7 +31,7 @@ import pt.upa.transporter.ws.TransporterService;
     targetNamespace="http://ws.broker.upa.pt/",
     serviceName="BrokerService"
     )
-@HandlerChain(file = "/handler-chain.xml")
+@HandlerChain(file = "/handler-chain.xml") 
 public class BrokerPort implements BrokerPortType {
 
   private List<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
@@ -68,7 +68,6 @@ public class BrokerPort implements BrokerPortType {
 	  
   }
   
-
   @Override
   public String ping(String name) {
     String returnValue;

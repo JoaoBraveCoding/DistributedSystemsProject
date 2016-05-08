@@ -1,5 +1,8 @@
 package pt.upa.transporter;
 
+import java.util.Map;
+
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Endpoint;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
@@ -25,7 +28,7 @@ public class TransporterApplication {
 		try {
 		  endpoint = Endpoint.create(tp);
 		  
-		  //publish endpoint
+	    //publish endpoint
 		  System.out.printf("Starting %s%n", url);
 		  endpoint.publish(url);
 		  

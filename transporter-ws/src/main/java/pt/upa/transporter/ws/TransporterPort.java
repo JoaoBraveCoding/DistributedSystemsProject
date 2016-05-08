@@ -8,9 +8,12 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.annotation.Resource;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 
 
 
@@ -22,7 +25,7 @@ import javax.xml.ws.BindingProvider;
 		targetNamespace="http://ws.transporter.upa.pt/",
 		serviceName="TransporterService"
 		)
-//1@HandlerChain(file = "/handler-chain.xml")
+//@HandlerChain(file = "/handler-chain.xml")
 public class TransporterPort implements TransporterPortType {
 
 	private int    identifierCounter;
@@ -32,6 +35,9 @@ public class TransporterPort implements TransporterPortType {
 	private List<JobView> jobs = new ArrayList<JobView>();
 	private Map<String, String> locations = new HashMap<String, String>();
 	private Map<String, String> placesNotOperable = new HashMap<String, String>();
+	
+	 @Resource
+	  private WebServiceContext webServiceContext;
 
 	public class ChangeState extends TimerTask {
 		private JobView      jw;
@@ -68,11 +74,6 @@ public class TransporterPort implements TransporterPortType {
 	public TransporterPort(String name) {
 		this.name = name;
 		
-		//have no idea about this..
-    BindingProvider bindingProvider = (BindingProvider) this;
-    Map<String, Object> requestContext = bindingProvider.getRequestContext();
-    requestContext.put("transporterName", name);
-
 		identifierCounter = -1;
 		locations.put("Lisboa", "Center");
 		locations.put("Leiria", "Center");
@@ -115,6 +116,8 @@ public class TransporterPort implements TransporterPortType {
 
 	@Override
 	public String ping(String name) {
+    MessageContext messageContext = webServiceContext.getMessageContext();
+    messageContext.put("transporterName", name);
 		System.out.println("Received Ping from " + name);
 		return "Pong " + name + "!";
 	}
@@ -123,6 +126,8 @@ public class TransporterPort implements TransporterPortType {
 	public JobView requestJob(String origin, String destination, int price)
 			throws BadLocationFault_Exception, BadPriceFault_Exception {
 
+    MessageContext messageContext = webServiceContext.getMessageContext();
+    messageContext.put("transporterName", name);
 	  System.out.println(origin + " destination: " + destination + " price: " + price);
 	  
 		JobView budgetJob;
@@ -221,6 +226,8 @@ public class TransporterPort implements TransporterPortType {
 
 	@Override
 	public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
+    MessageContext messageContext = webServiceContext.getMessageContext();
+    messageContext.put("transporterName", name);
 		if(id == null || id.equals("")){ 
 			BadJobFault faultInfo = new BadJobFault();
 			throw new BadJobFault_Exception("Empty or null job id", faultInfo);
@@ -254,6 +261,8 @@ public class TransporterPort implements TransporterPortType {
 
 	@Override
 	public JobView jobStatus(String id) {
+    MessageContext messageContext = webServiceContext.getMessageContext();
+    messageContext.put("transporterName", name);
 	  if(id==null){
 	    return null;
 	  }
@@ -274,6 +283,8 @@ public class TransporterPort implements TransporterPortType {
 	@Override
 	public List<JobView> listJobs() {
 		//TODO see if this is safe or if we need to return something else
+    MessageContext messageContext = webServiceContext.getMessageContext();
+    messageContext.put("transporterName", name);
 		return jobs;
 	}
 
