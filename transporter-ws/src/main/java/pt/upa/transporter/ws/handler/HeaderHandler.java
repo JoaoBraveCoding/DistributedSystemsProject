@@ -75,18 +75,31 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte nonce[] = new byte[16];
         random.nextBytes(nonce);
-               
-        //make digest
-        byte[] digest = SecurityFunctions.digestBroker(plainText, nonce);
-
-        //encrypt digest = signature
-        PrivateKey privKey = SecurityFunctions.getPrivKey("keys/UpaBrokerPriv.key");
-        byte[] signature = SecurityFunctions.makeDigitalSignature(digest, privKey);
-
+        
         // add header
         SOAPHeader sh = se.getHeader();
         if (sh == null)
           sh = se.addHeader();
+               
+//----  
+        //UpaTransporterX should be in context
+        String transporterNameText = (String) smc.get("transporterName");
+              
+        // set transporter element
+        Name transporterName = se.createName("transporter", "e", "urn:upa");
+        SOAPHeaderElement transporterElement = sh.addHeaderElement(transporterName);
+        transporterElement.addTextNode(transporterNameText);
+
+//----
+        
+        //make digest
+        byte[] digest = SecurityFunctions.digestTransporter(plainText, nonce, transporterNameText);
+        
+        //encrypt digest = signature
+        PrivateKey privKey = SecurityFunctions.getPrivKey("keys/UpaBrokerPriv.key");
+        byte[] signature = SecurityFunctions.makeDigitalSignature(digest, privKey);
+
+        
 
         //turn signature into text
         String textSignature = printBase64Binary(signature);
@@ -102,9 +115,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         Name nonceName = se.createName("nonce", "e", "urn:upa");
         SOAPHeaderElement nonceElement = sh.addHeaderElement(nonceName);
         nonceElement.addTextNode(textNonce);
-
-
-
+        
       } else {
         System.out.println("Reading header in inbound SOAP message...");
 
@@ -162,32 +173,32 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
         //change nonce to byte
         byte[] nonce = parseBase64Binary(nonceText);
+//--
+     // get signature element
+        Name certificate = se.createName("certificate", "e", "urn:upa");
+        it = sh.getChildElements(signatureName);
 
-        // get transporter element
-        Name transporterName = se.createName("transporter", "e", "urn:upa");
-        it = sh.getChildElements(transporterName);
-
+        // check header element
         if (!it.hasNext()) {
-          System.out.println("Transporter name not found.");
+          System.out.println("Certificate element not found.");
           return false;
         }
-        SOAPElement transporterElement = (SOAPElement) it.next();
+        SOAPElement certificateElement = (SOAPElement) it.next();
 
         // get header element value
-        String transporterText = transporterElement.getValue();
-
-        //get certificate from CA
-        String transporterCertificateText = null;//client.requestCertificate(transporterText);
-        byte[] transporterCertificate = parseBase64Binary(transporterCertificateText);
+        String certificateText = signatureElement.getValue();
+        
+        //get BrokerPubKey from certificate
+        byte[] certificateBin = parseBase64Binary(certificateText);
 
         PublicKey pubKeyCA = SecurityFunctions.getPubKey("keys/CaPub.key");
-        byte[] transporterPublicKey = SecurityFunctions.decryptMessage(pubKeyCA, transporterCertificate);
-        PublicKey pubKeyTransporter = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(transporterPublicKey));
+        byte[] brokerPublicKey = SecurityFunctions.decryptMessage(pubKeyCA, certificateBin);
+        PublicKey pubKeyBroker = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(brokerPublicKey));
 
-        byte[] computedDigest = SecurityFunctions.digestTransporter(bodyText, nonce, transporterText);
+        byte[] computedDigest = SecurityFunctions.digestBroker(bodyText, nonce);
 
-        //Fazer o verify - should the signature be already decrypted or does the function do that?
-        if(SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyTransporter)){
+        // verify - should the signature be already decrypted or does the function do that?
+        if(SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyBroker)){
           System.out.println("Wrong digital signature.");
           return false;
         }
