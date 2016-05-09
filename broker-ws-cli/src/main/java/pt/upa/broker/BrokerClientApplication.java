@@ -17,7 +17,8 @@ public class BrokerClientApplication {
     BrokerClient client = new BrokerClient(args[0], args[1]);
     
     System.out.println("Remote call ...");
-    String result = client.ping("Client");
+    //String result = client.ping("Client");
+    String result = client.requestTransport("Coimbra","Lisboa", 49);
     System.out.println(result);
   }
 }

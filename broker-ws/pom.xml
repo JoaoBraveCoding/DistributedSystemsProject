@@ -27,6 +27,7 @@
 
         <ws.name>UpaBroker</ws.name>
         <uddi.url>http://localhost:9090</uddi.url>
+        <ca.name>UpaCa</ca.name>
     </properties>
 
     <dependencies>
@@ -56,12 +57,31 @@
             <artifactId>uddi-naming</artifactId>
             <version>1.0</version>
         </dependency>
-         <!-- transporter-ws-cli ask if it's okay -->
+        <!-- transporter-ws-cli -->
         <dependency>
             <groupId>pt.upa.a44</groupId>
             <artifactId>transporter-ws-cli</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!-- ca-ws-cli -->
+        <dependency>
+            <groupId>pt.upa.a44</groupId>
+            <artifactId>ca-ws-cli</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- ws-handlers-aux -->
+        <dependency>
+            <groupId>pt.upa.a44</groupId>
+            <artifactId>ws-handlers-aux</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- ws-handlers-aux -->
+        <dependency>
+            <groupId>example</groupId>
+            <artifactId>ws-handlers</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -122,7 +142,8 @@
                     <arguments>
                         <argument>${uddi.url}</argument>
                         <argument>${ws.name}</argument>
-                        <argument>${ws.url}</argument>
+                        <argument>${ws.url}</argument> 
+                        <argument>${ca.name}</argument>
                     </arguments>
                 </configuration>
             </plugin>

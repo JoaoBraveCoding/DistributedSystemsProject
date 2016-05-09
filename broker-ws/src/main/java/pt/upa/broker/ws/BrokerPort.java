@@ -106,11 +106,11 @@ public class BrokerPort implements BrokerPortType {
       try {
         requested_job = transporter.requestJob(origin, destination, price);
 
-        jobs_transporters.put(requested_job, transporter);
-
         if(requested_job==null){
           continue;
         }
+        
+        jobs_transporters.put(requested_job, transporter);
 
         one_job_not_null = true;
         if(bestJob==null && requested_job.getJobPrice() < price ){
@@ -177,6 +177,7 @@ public class BrokerPort implements BrokerPortType {
     transport.setTransporterCompany(null);
     transport.setState(TransportStateView.REQUESTED);
 
+    transports.add(transport);
     return transport;
   }
 

@@ -1,28 +1,19 @@
 package pt.upa.broker;
 
-import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
-
 import java.util.Collection;
-import java.util.Map;
-
-import javax.xml.registry.JAXRException;
-import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Endpoint;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
 import pt.upa.broker.ws.BrokerPort;
-import pt.upa.broker.ws.BrokerPortType;
-import pt.upa.broker.ws.BrokerService;
-import pt.upa.transporter.ws.TransporterPortType; 
-import pt.upa.transporter.ws.TransporterService;
+
 
 public class BrokerApplication {
   private static BrokerPort broker;
 	public static void main(String[] args) throws Exception {
     //Check arguments
-    if (args.length < 3) {
+    if (args.length < 4) {
       System.err.println("Argument(s) misssing!");
-      System.err.printf("Usage: java %s uddiURL wsName wsURL%n", BrokerApplication.class.getName());
+      System.err.printf("Usage: java %s uddiURL wsName wsURL ca-wsName%n", BrokerApplication.class.getName());
     }
 
     System.out.println(BrokerApplication.class.getSimpleName() + " starting...");
@@ -30,6 +21,7 @@ public class BrokerApplication {
     String uddiURL = args[0];
     String name    = args[1];
     String url     = args[2];
+    String ca   = args[3];
     
     Endpoint endpoint = null;
     UDDINaming uddiNaming = null;
@@ -55,7 +47,11 @@ public class BrokerApplication {
       System.out.println("Adding transporters...");
       for(String s : resultUDDIList)
         broker.addTransporter(s, uddiNaming);
-            
+      
+      //Adding ca to broker
+      String caEndpointAddress = uddiNaming.lookup(ca); 
+      broker.addCa(caEndpointAddress);
+      
       uddiNaming.rebind(name, url);
 
       //wait
