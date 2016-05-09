@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,6 +15,8 @@ import javax.jws.WebService;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
+
+import com.sun.xml.ws.api.server.LazyMOMProvider.Scope;
 
 
 
@@ -36,8 +39,8 @@ public class TransporterPort implements TransporterPortType {
 	private Map<String, String> locations = new HashMap<String, String>();
 	private Map<String, String> placesNotOperable = new HashMap<String, String>();
 	
-	@Resource
-  private WebServiceContext webServiceContext;
+	@Resource 
+	private WebServiceContext webServiceContext;
 
 	public class ChangeState extends TimerTask {
 		private JobView      jw;
@@ -121,13 +124,14 @@ public class TransporterPort implements TransporterPortType {
 		System.out.println("Received Ping from " + name);
 		return "Pong " + name + "!";
 	}
-
+	
 	@Override
 	public JobView requestJob(String origin, String destination, int price)
 			throws BadLocationFault_Exception, BadPriceFault_Exception {
 	  
-	  /*MessageContext messageContext = webServiceContext.getMessageContext();
+	  /*    MessageContext messageContext = webServiceContext.getMessageContext();
     messageContext.put("transporterName", name);*/
+    
 	  System.out.println(origin + " destination: " + destination + " price: " + price);
 	  
 		JobView budgetJob;

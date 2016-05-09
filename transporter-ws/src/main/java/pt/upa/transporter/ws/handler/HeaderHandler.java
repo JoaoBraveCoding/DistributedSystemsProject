@@ -85,8 +85,9 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
                
 //----  
         //UpaTransporterX should be in context
-        String transporterNameText = (String) smc.get("transporterName");
-              
+        //String transporterNameText = (String) smc.get("transporterName");
+        String transporterNameText = "UpaTransporter2";      
+        
         // set transporter element
         Name transporterName = se.createName("transporter", "e", "urn:upa");
         SOAPHeaderElement transporterElement = sh.addHeaderElement(transporterName);

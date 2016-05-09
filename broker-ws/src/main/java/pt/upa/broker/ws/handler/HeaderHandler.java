@@ -212,7 +212,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         byte[] computedDigest = SecurityFunctions.digestTransporter(bodyText, nonce, transporterText);
 
         //Fazer o verify - should the signature be already decrypted or does the function do that?
-        if(SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyTransporter)){
+        if(!SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyTransporter)){
           System.out.println("Wrong digital signature.");
           return false;
         }
