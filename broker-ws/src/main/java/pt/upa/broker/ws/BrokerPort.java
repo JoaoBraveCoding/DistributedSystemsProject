@@ -33,41 +33,44 @@ public class BrokerPort implements BrokerPortType {
 
   private List<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
   private List<TransportView>    	transports   = new ArrayList<TransportView>();
-  private Map<TransportView, JobView> transports_jobs = new HashMap<TransportView, JobView>();
-  private Map<TransportView, TransporterPortType> transports_transporters = new HashMap<TransportView, TransporterPortType>();
+  // private Map<TransportView, JobView> transports_jobs = new HashMap<TransportView, JobView>();
+  // private Map<TransportView, TransporterPortType> transports_transporters = new HashMap<TransportView, TransporterPortType>();
   private Map<String, String> places = new HashMap<String, String>();
   private int identifierCounter = 0;
-  
+
   public BrokerPort() {
-	  super();
-	  // adding known places 
-	  places.put("Porto", "North");
-	  places.put("Braga", "North");
-	  places.put("Viana do Castelo", "North");
-	  places.put("Bragança", "North");
-	  
-	  places.put("Lisboa", "Center");
-	  places.put("Leiria", "Center");
-	  places.put("Santarém", "Center");
-	  places.put("Castelo Branco", "Center");
-	  places.put("Coimbra", "Center");
-	  places.put("Aveiro", "Center");
-	  places.put("Viseu", "Center");
-	  places.put("Guarda", "Center");
-	  
-	  places.put("Setúbal", "South");
-	  places.put("Évora", "South");
-	  places.put("Portalegre", "South");
-	  places.put("Faro", "South");
+    super();
+    // adding known places 
+    places.put("Porto", "North");
+    places.put("Braga", "North");
+    places.put("Viana do Castelo", "North");
+    places.put("Vila Real", "North");
+    places.put("Bragança", "North");
+
+    places.put("Lisboa", "Center");
+    places.put("Leiria", "Center");
+    places.put("Santarém", "Center");
+    places.put("Castelo Branco", "Center");
+    places.put("Coimbra", "Center");
+    places.put("Aveiro", "Center");
+    places.put("Viseu", "Center");
+    places.put("Guarda", "Center");
+
+    places.put("Setúbal", "South");
+    places.put("Évora", "South");
+    places.put("Portalegre", "South");
+    places.put("Beja", "South");
+    places.put("Faro", "South");
+
   }
-  
+
 
   @Override
   public String ping(String name) {
     String returnValue;
     int counter = 0;
     System.out.println("Received ping from " + name);
-    
+
     //Pinging transporters 
     System.out.println("Pingging transporters");
     for(TransporterPortType port : transporters){
@@ -81,189 +84,194 @@ public class BrokerPort implements BrokerPortType {
   }
 
   @Override
-  public String requestTransport(String origin, String destination, int price) throws InvalidPriceFault_Exception,
-  UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
+  public String requestTransport(String origin, String destination, int price) throws 
+  UnknownLocationFault_Exception, InvalidPriceFault_Exception, UnavailableTransportFault_Exception, 
+  UnavailableTransportPriceFault_Exception {
 
-	  // check if origin is known
-	  placeExists(origin);
-	  // check if destination is known
-	  placeExists(destination);
-	  // check if price is positive
-	  priceIsValid(price);
+    JobView bestJob = null;
+    TransporterPortType bestTransporter = null;
+    boolean one_job_not_null = false;
+    Map<JobView,TransporterPortType> jobs_transporters = new HashMap<JobView,TransporterPortType>();
+    // check if origin is known
+    placeExists(origin);
+    // check if destination is known
+    placeExists(destination);
+    // check if price is positive
+    priceIsValid(price);
 
-	  // find best job
-	  TransportView transportView = null;
-	  // best price will never be higher than proposed max
-	  int bestPrice = price;
-	  JobView bestJob = null;
-	  TransporterPortType bestTransporter = null;
-	  
-	  // for not chosen jobs
-	  Map<JobView, TransporterPortType> badJobs = new HashMap<JobView, TransporterPortType>();
-	  Map<JobView, TransportView> badTransports = new HashMap<JobView, TransportView>();
-	  boolean higher_price = false;
-	  
-	  for(TransporterPortType transporter: transporters){
-		  try {
-			  // create transport for each transporter
-			  transportView = createTransport(origin, destination, price, bestTransporter);
-			  // request a job
-			  JobView job = transporter.requestJob(origin, destination, price);
-			  // add to arrays the new information job-transport
-			  transports_jobs.put(transportView, job); // class attribute
-			  transports_transporters.put(transportView, transporter);
-			  // function locals
-			  badJobs.put(job, transporter);
-			  badTransports.put(job, transportView);
-			  System.out.println("Proposed price: " + job.getJobPrice());
-			  
-			  // set transport state to BUDGETED
-			  transportView.setState(TransportStateView.BUDGETED);
-			  if (job == null) continue;
-			  // check if price is better that it was before
-			  if (job.getJobPrice() <= bestPrice){
-				  bestJob = job;
-				  bestTransporter = transporter;
-				  bestPrice = bestJob.getJobPrice();
-			  } else { higher_price = true; } // needed to throw UnavailableTransportPrice
-		  } catch (BadLocationFault_Exception e) { 
-			  System.out.println(e.getMessage());
-		  } catch (BadPriceFault_Exception e) {
-			  System.out.println(e.getMessage());
-		  }
-	  }
-	  // no job to fulfill client's needs
-	  UnavailableTransportFault fault1 = new UnavailableTransportFault();
-	  if (bestJob == null) throw new UnavailableTransportFault_Exception("No transporter for the job", fault1);
-	  
-	  // the price was always higher than the maximum allowed 
-	  UnavailableTransportPriceFault fault2 = new UnavailableTransportPriceFault();
-	  if (higher_price && bestJob == null) throw new UnavailableTransportPriceFault_Exception("Uknavailable Price.", fault2);
-	  
-	  // remove bestjob from badjobs
-	  badJobs.remove(bestJob);
+    TransportView transport = createTransport(origin, destination);
 
-	  // update non chosen jobs status to failed
-	  for(JobView j : badJobs.keySet()){
-		  badTransports.get(j).setState(TransportStateView.FAILED);
-	  }
-	  
-	  
-	  try {
-		  // tell transporter to accept bestJob offer
-		  JobView stateJob = bestTransporter.decideJob(bestJob.getJobIdentifier(), true);
-		 
+    for(TransporterPortType transporter: transporters){
+      JobView requested_job;
+      try {
+        requested_job = transporter.requestJob(origin, destination, price);
 
-		  badTransports.get(bestJob).setState(TransportStateView.BOOKED);
+        jobs_transporters.put(requested_job, transporter);
 
-		 
-		 for(JobView j: badJobs.keySet()){
-			 stateJob = badJobs.get(j).decideJob(j.getJobIdentifier(), false);
-			 badTransports.get(j).setState(TransportStateView.FAILED);;
+        if(requested_job==null){
+          continue;
+        }
 
-		 }
-	  } catch (BadJobFault_Exception e) {
-	  }
-	  return transportView.getId();
+        one_job_not_null = true;
+        if(bestJob==null && requested_job.getJobPrice() < price ){
+          bestJob = requested_job;
+          bestTransporter = transporter;
+        }
+
+        if(bestJob!=null && requested_job.getJobPrice() <= bestJob.getJobPrice()){
+          bestJob = requested_job;
+          bestTransporter = transporter;
+        }
+      } catch (BadLocationFault_Exception | BadPriceFault_Exception e) {
+        System.out.println(e.getMessage());
+      }
+    }
+
+    if(bestJob==null && !one_job_not_null){
+      transport.setState(TransportStateView.FAILED);
+      UnavailableTransportFault fault = new UnavailableTransportFault();
+      throw new UnavailableTransportFault_Exception("No transporter for the job", fault);
+    }
+    else if(bestJob==null && one_job_not_null){
+      transport.setState(TransportStateView.FAILED);
+      UnavailableTransportPriceFault fault = new UnavailableTransportPriceFault();
+      throw new UnavailableTransportPriceFault_Exception("Unavailable price", fault);
+    }
+
+    updateTransport(transport, bestTransporter, bestJob);
+    try {
+      bestTransporter.decideJob(bestJob.getJobIdentifier(), true);
+    } catch (BadJobFault_Exception e) {
+      System.out.println(e.getMessage());
+    }
+    transport.setState(TransportStateView.BOOKED);
+
+    for(JobView job: jobs_transporters.keySet()){
+      if(job.getJobIdentifier()!=bestJob.getJobIdentifier()){
+        try {
+          jobs_transporters.get(job).decideJob(job.getJobIdentifier(), false);
+        } catch (BadJobFault_Exception e) {
+          System.out.println(e.getMessage());
+        }
+      }
+    }
+    return transport.getId();
   }
-  
-  private TransportView createTransport(String origin, String destination, int price, TransporterPortType transporter) {
-	TransportView transport = new TransportView();
-	
-	transport.setId(getIdentifier());
-	transport.setOrigin(origin);
-	transport.setDestination(destination);
-	transport.setPrice(price);
-	transport.setTransporterCompany(getTransporterPortTypeName(transporter));
-	transport.setState(TransportStateView.REQUESTED);
-	
-	transports.add(transport);
-	return transport;
-}
+
+  private TransportView updateTransport(TransportView transport, TransporterPortType transporter, JobView job) {
+    transport.setId(transport.getId()+"_"+getTransporterPortTypeName(transporter)+"_"+job.getJobIdentifier());
+    transport.setPrice(job.getJobPrice());
+    transport.setTransporterCompany(getTransporterPortTypeName(transporter));
+    transport.setState(TransportStateView.BUDGETED);
+
+    return transport;
+  }
+
+  private TransportView createTransport(String origin, String destination) {
+    TransportView transport = new TransportView();
+
+    transport.setId(getIdentifier());
+    transport.setOrigin(origin);
+    transport.setDestination(destination);
+    transport.setPrice(-1);
+    transport.setTransporterCompany(null);
+    transport.setState(TransportStateView.REQUESTED);
+
+    return transport;
+  }
 
 
-// Check if place exists
+  // Check if place exists
   private void placeExists(String place) throws UnknownLocationFault_Exception{
-	  if(places.containsKey(place)) return;
-	  
-	  UnknownLocationFault fault = new UnknownLocationFault();
-	  fault.setLocation(place);
-	  throw new UnknownLocationFault_Exception("Location not found. ", fault);
+    if(places.containsKey(place)) return;
+
+    UnknownLocationFault fault = new UnknownLocationFault();
+    fault.setLocation(place);
+    throw new UnknownLocationFault_Exception("Location not found. ", fault);
   }
-  
+
   // Check if price is valid
   private void priceIsValid(int price) throws InvalidPriceFault_Exception{
-	  if (price < 0) {
-		  InvalidPriceFault fault = new InvalidPriceFault();
-		  fault.setPrice(price);
-		  throw new InvalidPriceFault_Exception("Price invalid. ", fault);
-	  }
-	  return;
+    if (price < 0) {
+      InvalidPriceFault fault = new InvalidPriceFault();
+      fault.setPrice(price);
+      throw new InvalidPriceFault_Exception("Price invalid. ", fault);
+    }
+    return;
   }
-  
+
   private String getIdentifier(){
-	  identifierCounter++;
-	  return "" + identifierCounter;
+    identifierCounter++;
+    return "" + identifierCounter;
   }
-  
+
   private String getTransporterPortTypeName(TransporterPortType transporter){
-	  for (Integer i = 0; i < transporters.size(); i++){
-		  if(transporter == transporters.get(i)){
-			  return i.toString();
-		  }
-	  }
-	  return "";
+    for (Integer i = 0; i < transporters.size(); i++){
+      if(transporter == transporters.get(i)){
+        return i.toString();
+      }
+    }
+    return "";
   }
 
   @Override
   public TransportView viewTransport(String id) throws UnknownTransportFault_Exception {
-	  JobView corresponding_job = null;
-	  TransporterPortType corresponding_company = null;
-	  
-	for(TransportView transport: transports){
-		// get right transport
-		
-		if(transport.getId().equals(id)) {
-			corresponding_job = this.transports_jobs.get(transport);
-			corresponding_company = this.transports_transporters.get(transport);
-			
-			
-			String identifier = corresponding_job.getJobIdentifier();
-			JobView job_status = corresponding_company.jobStatus(identifier);
-			corresponding_job.setJobState(job_status.getJobState());
-		
-		
-			if(corresponding_job.getJobState() == JobStateView.HEADING) transport.setState(TransportStateView.HEADING);
-			if(corresponding_job.getJobState() == JobStateView.ONGOING) transport.setState(TransportStateView.ONGOING);
-			if(corresponding_job.getJobState() == JobStateView.COMPLETED) transport.setState(TransportStateView.COMPLETED);
-			
-			return transport;
-		}
-	}
-	
-	UnknownTransportFault fault = new UnknownTransportFault();
-	fault.setId(id);
+    TransporterPortType corresponding_company = null;
+
+    for(TransportView transport: transports){
+
+      if(transport.getId().equals(id)) {
+        corresponding_company = this.getTransporter(transport);
+
+        String identifier = getJobIdentifier(transport);
+        JobView job_status = corresponding_company.jobStatus(identifier);
+
+        if(job_status.getJobState() == JobStateView.HEADING) transport.setState(TransportStateView.HEADING);
+        if(job_status.getJobState() == JobStateView.ONGOING) transport.setState(TransportStateView.ONGOING);
+        if(job_status.getJobState() == JobStateView.COMPLETED) transport.setState(TransportStateView.COMPLETED);
+
+        return transport;
+      }
+    }
+
+    UnknownTransportFault fault = new UnknownTransportFault();
+    fault.setId(id);
     throw new UnknownTransportFault_Exception("Transport not found. ", fault);
+  }
+
+  public TransporterPortType getTransporter(TransportView transport){
+    String transporter_id = transport.id.split("_")[1];
+    for(TransporterPortType transporter: transporters){
+      if(getTransporterPortTypeName(transporter).equals(transporter_id)){
+        return transporter;
+      }
+    }
+    return null;
+  }
+  
+  public String getJobIdentifier(TransportView transport){
+    return transport.getId().split("_")[2];
   }
 
   @Override
   public List<TransportView> listTransports() {
+
     return transports;
   }
 
   @Override
   public void clearTransports() {
-  identifierCounter = 0;
-	for(TransporterPortType transporter: transporters){
-		transporter.clearJobs();
-	}
+    identifierCounter = 0;
+    for(TransporterPortType transporter: transporters){
+      transporter.clearJobs();
+    }
     transports = new ArrayList<TransportView>();
   }
-  
+
   public List<TransportView> getTransports() {
     return transports;
   }
-  
+
   public void addTransporter(String name, UDDINaming uddiNaming) throws JAXRException{
     String endpointAddress = name;
     if (endpointAddress == null) {
@@ -272,12 +280,12 @@ public class BrokerPort implements BrokerPortType {
     }
     TransporterService service = new TransporterService();
     TransporterPortType port = service.getTransporterPort();
-    
+
     BindingProvider bindingProvider = (BindingProvider) port;
     Map<String, Object> requestContext = bindingProvider.getRequestContext();
     requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
 
     transporters.add(port);
   }
-  
+
 }
