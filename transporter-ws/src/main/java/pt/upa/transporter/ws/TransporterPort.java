@@ -36,8 +36,8 @@ public class TransporterPort implements TransporterPortType {
 	private Map<String, String> locations = new HashMap<String, String>();
 	private Map<String, String> placesNotOperable = new HashMap<String, String>();
 	
-	 @Resource
-	  private WebServiceContext webServiceContext;
+	@Resource
+  private WebServiceContext webServiceContext;
 
 	public class ChangeState extends TimerTask {
 		private JobView      jw;
@@ -125,8 +125,8 @@ public class TransporterPort implements TransporterPortType {
 	@Override
 	public JobView requestJob(String origin, String destination, int price)
 			throws BadLocationFault_Exception, BadPriceFault_Exception {
-
-    /*MessageContext messageContext = webServiceContext.getMessageContext();
+	  
+	  /*MessageContext messageContext = webServiceContext.getMessageContext();
     messageContext.put("transporterName", name);*/
 	  System.out.println(origin + " destination: " + destination + " price: " + price);
 	  

@@ -1,5 +1,7 @@
 package pt.upa.ca;
 
+import java.security.cert.Certificate;
+
 import pt.upa.ca.ws.cli.CaClient;
 
 public class CaClientApplication {

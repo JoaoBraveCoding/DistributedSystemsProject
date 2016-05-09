@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.util.Iterator;
 
 import javax.xml.soap.Name;
@@ -88,7 +89,7 @@ public class HeaderHandlerTest extends AbstractHandlerTest {
         assertTrue(it.hasNext());
         
         element = (SOAPElement) it.next();
-        valueString = element.getTextContent();
+        valueString = element.getValue();
         byte[] nonce = parseBase64Binary(valueString);
         
         //obtaining plaintext
@@ -102,7 +103,10 @@ public class HeaderHandlerTest extends AbstractHandlerTest {
         //digest msg + nonce
         byte[] bytes = SecurityFunctions.digestBroker(msg, nonce);
         
-        assertTrue(SecurityFunctions.verifyDigitalSignature(signatureByte, bytes, SecurityFunctions.getPubKey("../ca-ws/keys/UpaBrokerPub.key")));
+        Certificate cer = SecurityFunctions.readCertificateFile("../ca-ws/keys/UpaBroker.cer");
+        PublicKey pub = SecurityFunctions.getPublicKeyFromCertificate(cer);
+        
+        assertTrue(SecurityFunctions.verifyDigitalSignature(signatureByte, bytes, pub));
 
         //soapMessage.writeTo(System.out);
     }

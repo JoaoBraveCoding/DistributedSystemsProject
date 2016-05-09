@@ -1,10 +1,12 @@
 package pt.upa.broker.ws.handler;
 
-import java.security.KeyFactory;
+import java.io.ByteArrayInputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -77,19 +79,23 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         }
         SOAPElement element = (SOAPElement) it.next();
         String plainText = element.getTextContent();
-
+        
+        System.out.println(plainText + "   PLAINTEXT");
+        
         //get random for nonce
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte nonce[] = new byte[16];
         random.nextBytes(nonce);
                
+        System.out.println(plainText + "  " + nonce + "   PLAINTEXT  & NONCE");
         //make digest
         byte[] digest = SecurityFunctions.digestBroker(plainText, nonce);
 
         //encrypt digest = signature
-        PrivateKey privKey = SecurityFunctions.getPrivKey("keys/UpaBrokerPriv.key");
+        PrivateKey privKey = SecurityFunctions.getPrivateKeyFromKeystore("keys/UpaBroker.jks", "passwd".toCharArray(), "UpaBroker", "passwd".toCharArray()); 
+        
         byte[] signature = SecurityFunctions.makeDigitalSignature(digest, privKey);
-
+        
         // add header
         SOAPHeader sh = se.getHeader();
         if (sh == null)
@@ -98,6 +104,8 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         //turn signature into text
         String textSignature = printBase64Binary(signature);
 
+        System.out.println(Arrays.equals(parseBase64Binary(textSignature), signature) +  "  signature  textVSbytes");
+        
         // get first header element TODO what's with the e?
         Name signatureName = se.createName("signature", "e", "urn:upa");
         SOAPHeaderElement elementHeader = sh.addHeaderElement(signatureName);
@@ -110,6 +118,9 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         SOAPHeaderElement nonceElement = sh.addHeaderElement(nonceName);
         nonceElement.addTextNode(textNonce);
 
+        System.out.println(Arrays.equals(parseBase64Binary(textNonce),nonce) +  "    Nonce textVSbytes");
+
+        
         //get certificate from CA
         String textBrokerCertificate = client.requestCertificate("UpaBroker");
 
@@ -192,12 +203,12 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
         //get certificate from CA
         String transporterCertificateText = client.requestCertificate(transporterText);
-        byte[] transporterCertificate = parseBase64Binary(transporterCertificateText);
+        byte[] byteCertificate = parseBase64Binary(transporterCertificateText);
+        CertificateFactory cf   = CertificateFactory.getInstance("X.509");
+        Certificate certificate = cf.generateCertificate(new ByteArrayInputStream(byteCertificate));
 
-        PublicKey pubKeyCA = SecurityFunctions.getPubKey("keys/CaPub.key");
-        byte[] transporterPublicKey = SecurityFunctions.decryptMessage(pubKeyCA, transporterCertificate);
-        PublicKey pubKeyTransporter = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(transporterPublicKey));
-
+        PublicKey pubKeyTransporter = certificate.getPublicKey();
+        
         byte[] computedDigest = SecurityFunctions.digestTransporter(bodyText, nonce, transporterText);
 
         //Fazer o verify - should the signature be already decrypted or does the function do that?
@@ -211,7 +222,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
       System.out.print("Caught exception in handleMessage: ");
       System.out.println(e);
       e.printStackTrace();
-      System.out.println("Continue normal processing...");
+      return false;
     }
 
     return true;

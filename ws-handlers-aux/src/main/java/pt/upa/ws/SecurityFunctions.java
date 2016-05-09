@@ -1,22 +1,32 @@
 package pt.upa.ws;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.junit.validator.PublicClassValidator;
 
@@ -55,37 +65,80 @@ public class SecurityFunctions {
     return messageDigest.digest();
   }
 
-  public static byte[] readFile(String path) throws FileNotFoundException, IOException {
-    FileInputStream fis = new FileInputStream(path);
-    byte[] content = new byte[fis.available()];
-    fis.read(content);
+  /**
+   * Returns the public key from a certificate
+   * 
+   * @param certificate
+   * @return
+   */
+  public static PublicKey getPublicKeyFromCertificate(Certificate certificate) {
+    return certificate.getPublicKey();
+  }
+
+  /**
+   * Reads a certificate from a file
+   * 
+   * @return
+   * @throws Exception
+   */
+  public static Certificate readCertificateFile(String certificateFilePath) throws Exception {
+    FileInputStream fis;
+
+    try {
+      fis = new FileInputStream(certificateFilePath);
+    } catch (FileNotFoundException e) {
+      System.err.println("Certificate file <" + certificateFilePath + "> not fount.");
+      return null;
+    }
+    BufferedInputStream bis = new BufferedInputStream(fis);
+
+    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+    if (bis.available() > 0) {
+      Certificate cert = cf.generateCertificate(bis);
+      return cert;
+      // It is possible to print the content of the certificate file:
+      // System.out.println(cert.toString());
+    }
+    bis.close();
     fis.close();
-    return content;
+    return null;
   }
 
-  public static byte[] decryptMessage(PublicKey publicKey, byte[] message) throws Exception{
-    // get an RSA cipher object
-    Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+  /**
+   * Reads a PrivateKey from a key-store
+   * 
+   * @return The PrivateKey
+   * @throws Exception
+   */
+  public static PrivateKey getPrivateKeyFromKeystore(String keyStoreFilePath, char[] keyStorePassword,
+      String keyAlias, char[] keyPassword) throws Exception {
 
-    // decrypt the ciphered digest using the public key
-    cipher.init(Cipher.DECRYPT_MODE, publicKey);
-    return cipher.doFinal(message);
+    KeyStore keystore = readKeystoreFile(keyStoreFilePath, keyStorePassword);
+    PrivateKey key = (PrivateKey) keystore.getKey(keyAlias, keyPassword);
+
+    return key;
   }
 
-  public static PrivateKey getPrivKey(String path) throws Exception{
-    byte[] privEncoded = readFile(path);
-    PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privEncoded);
-    KeyFactory keyFacPriv = KeyFactory.getInstance("RSA");
-    return keyFacPriv.generatePrivate(privSpec);
+  /**
+   * Reads a KeyStore from a file
+   * 
+   * @return The read KeyStore
+   * @throws Exception
+   */
+  public static KeyStore readKeystoreFile(String keyStoreFilePath, char[] keyStorePassword) throws Exception {
+    FileInputStream fis;
+    try {
+      fis = new FileInputStream(keyStoreFilePath);
+    } catch (FileNotFoundException e) {
+      System.err.println("Keystore file <" + keyStoreFilePath + "> not fount.");
+      return null;
+    }
+    KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+    keystore.load(fis, keyStorePassword);
+    return keystore;
   }
 
-  public static PublicKey getPubKey(String path) throws Exception{
-    byte[] pubEncoded = readFile(path);
-    X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubEncoded);
-    KeyFactory keyFacPub = KeyFactory.getInstance("RSA");
-    return keyFacPub.generatePublic(pubSpec);
-  }
-  
   /** auxiliary method to calculate digest from text and cipher it */
   public static byte[] makeDigitalSignature(byte[] bytes, PrivateKey privateKey) throws Exception {
 
@@ -98,7 +151,7 @@ public class SecurityFunctions {
 
     return signature;
   }
-  
+
   /**
    * auxiliary method to calculate new digest from text and compare it to the
    * to deciphered digest
@@ -116,5 +169,33 @@ public class SecurityFunctions {
       System.err.println("Caught exception while verifying signature " + se);
       return false;
     }
+  }
+  
+  /**
+   * Verifica se um certificado foi devidamente assinado pela CA
+   * 
+   * @param certificate
+   *            certificado a ser verificado
+   * @param caPublicKey
+   *            certificado da CA
+   * @return true se foi devidamente assinado
+   */
+  public static boolean verifySignedCertificate(Certificate certificate, PublicKey caPublicKey) {
+    try {
+      certificate.verify(caPublicKey);
+    } catch (InvalidKeyException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException
+        | SignatureException e) {
+      // O método Certifecate.verify() não retorna qualquer valor (void).
+      // Quando um certificado é inválido, isto é, não foi devidamente
+      // assinado pela CA
+      // é lançada uma excepção: java.security.SignatureException:
+      // Signature does not match.
+      // também são lançadas excepções caso o certificado esteja num
+      // formato incorrecto ou tenha uma
+      // chave inválida.
+
+      return false;
+    }
+    return true;
   }
 }

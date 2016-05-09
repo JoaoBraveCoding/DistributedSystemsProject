@@ -1,12 +1,16 @@
 package pt.upa.ca.ws;
 
-import java.security.PrivateKey;
+import java.io.ByteArrayInputStream;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+
 import javax.jws.WebService;
 
 import pt.upa.ca.exception.NullValueReceivedException;
 import pt.upa.ws.SecurityFunctions;
-
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
+import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
+
 
 @WebService(
     endpointInterface="pt.upa.ca.ws.CaPortType",
@@ -23,22 +27,19 @@ public class CaPort implements CaPortType {
   }
 
   @Override
-  public String requestCertificate(String name){
+  public String requestCertificate(String name) throws Exception{
     if(name == null){
       throw new NullValueReceivedException();
     }
-    try {
-      //Read keys from files
-      byte[] serverPubKey = SecurityFunctions.readFile("keys/" + name + "Pub.key");
-      PrivateKey caPrivKey    = SecurityFunctions.getPrivKey("keys/CaPriv.key");
-  
-      //Generate the certificate
-      byte[] certificate = SecurityFunctions.makeDigitalSignature(serverPubKey, caPrivKey);
-      return printBase64Binary(certificate);
-
-    } catch (Exception e) { e.printStackTrace(); }
-    return null;
+    Certificate certificate = SecurityFunctions.readCertificateFile("keys/" + name + ".cer");
+    String stringCertificate = printBase64Binary(certificate.getEncoded());
+    
+    byte[] byteCertificate = parseBase64Binary(stringCertificate);
+    CertificateFactory cf   = CertificateFactory.getInstance("X.509");
+    Certificate certificateR = cf.generateCertificate(new ByteArrayInputStream(byteCertificate));
+    
+    System.out.println(certificate.equals(certificateR));
+    return stringCertificate;
   }
-
  
 }

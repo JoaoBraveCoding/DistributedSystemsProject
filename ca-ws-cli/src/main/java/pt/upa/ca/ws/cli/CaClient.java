@@ -3,6 +3,7 @@ package pt.upa.ca.ws.cli;
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
 import java.net.UnknownServiceException;
+import java.security.cert.Certificate;
 import java.util.Map;
 
 import javax.xml.registry.JAXRException;
@@ -69,13 +70,8 @@ public class CaClient {
     return port.ping(string);
   }
 
-  public String requestCertificate(String string) {
-    try {
-      return port.requestCertificate(string);
-    } catch (Exception_Exception e) {
-      e.printStackTrace();
-    }
-    return null;
+  public String requestCertificate(String string) throws Exception_Exception {
+    return port.requestCertificate(string);
   }
   
 }

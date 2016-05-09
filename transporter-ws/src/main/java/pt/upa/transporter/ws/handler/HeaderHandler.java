@@ -1,10 +1,11 @@
 package pt.upa.transporter.ws.handler;
 
-import java.security.KeyFactory;
+import java.io.ByteArrayInputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
 import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.handler.MessageContext.Scope;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
@@ -96,9 +98,8 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         byte[] digest = SecurityFunctions.digestTransporter(plainText, nonce, transporterNameText);
         
         //encrypt digest = signature
-        PrivateKey privKey = SecurityFunctions.getPrivKey("keys/"+ transporterNameText +"Priv.key");
+        PrivateKey privKey = SecurityFunctions.getPrivateKeyFromKeystore("keys/"+ transporterNameText + ".jks", "passwd".toCharArray(), transporterNameText, "passwd".toCharArray());
         byte[] signature = SecurityFunctions.makeDigitalSignature(digest, privKey);
-
 
 
         //turn signature into text
@@ -135,6 +136,8 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         SOAPElement element = (SOAPElement) it.next();
         String bodyText = element.getTextContent();                
 
+        System.out.println(bodyText + "   -------");
+        
         // check header
         if (sh == null) {
           System.out.println("Header not found.");
@@ -154,8 +157,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
         // get header element value
         String signatureText = signatureElement.getValue();
-
-        //change signature to byte
         byte[] signature = parseBase64Binary(signatureText);
 
         // get nonce element
@@ -189,26 +190,26 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         String certificateText = certificateElement.getValue();
         
         //get BrokerPubKey from certificate
-        byte[] certificateBin = parseBase64Binary(certificateText);
-
-        PublicKey pubKeyCA = SecurityFunctions.getPubKey("keys/CaPub.key");
-        byte[] brokerPublicKey = SecurityFunctions.decryptMessage(pubKeyCA, certificateBin);
-        PublicKey pubKeyBroker = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(brokerPublicKey));
-
+        byte[] byteCertificate   = parseBase64Binary(certificateText);
+        CertificateFactory cf    = CertificateFactory.getInstance("X.509");
+        Certificate certificate1 = cf.generateCertificate(new ByteArrayInputStream(byteCertificate));
+        PublicKey pubKeyBroker   = SecurityFunctions.getPublicKeyFromCertificate(certificate1);
+        
+        //computing digest
         byte[] computedDigest = SecurityFunctions.digestBroker(bodyText, nonce);
 
         // verify - should the signature be already decrypted or does the function do that?
-        if(SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyBroker)){
+        if(!SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyBroker)){
           System.out.println("Wrong digital signature.");
           return false;
         }
+        
 
       }
     } catch (Exception e) {
       System.out.print("Caught exception in handleMessage: ");
       System.out.println(e);
-      e.printStackTrace();
-      System.out.println("Continue normal processing...");
+      return false;
     }
 
     return true;
