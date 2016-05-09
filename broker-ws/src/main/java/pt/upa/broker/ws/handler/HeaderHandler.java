@@ -61,10 +61,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
     try {
       if (outboundElement.booleanValue()) {
-        if (smc.HTTP_RESPONSE_CODE != null){
-          System.out.println("Resposta não intressa");
-          return true;
-        }
         System.out.println("Writing header in outbound SOAP message...");
 
         // get SOAP envelope
@@ -123,10 +119,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         System.out.println("Message sent");
 
       } else {
-        if (smc.HTTP_REQUEST_METHOD != null){
-          System.out.println("Pedido não intressa");
-          return true;
-        }
         System.out.println("Reading header in inbound SOAP message...");
 
 

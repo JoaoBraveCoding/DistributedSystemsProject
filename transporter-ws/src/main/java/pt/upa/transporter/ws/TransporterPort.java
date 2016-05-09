@@ -116,8 +116,8 @@ public class TransporterPort implements TransporterPortType {
 
 	@Override
 	public String ping(String name) {
-    MessageContext messageContext = webServiceContext.getMessageContext();
-    messageContext.put("transporterName", name);
+/*    MessageContext messageContext = webServiceContext.getMessageContext();
+    messageContext.put("transporterName", name);*/
 		System.out.println("Received Ping from " + name);
 		return "Pong " + name + "!";
 	}
@@ -126,8 +126,8 @@ public class TransporterPort implements TransporterPortType {
 	public JobView requestJob(String origin, String destination, int price)
 			throws BadLocationFault_Exception, BadPriceFault_Exception {
 
-    MessageContext messageContext = webServiceContext.getMessageContext();
-    messageContext.put("transporterName", name);
+    /*MessageContext messageContext = webServiceContext.getMessageContext();
+    messageContext.put("transporterName", name);*/
 	  System.out.println(origin + " destination: " + destination + " price: " + price);
 	  
 		JobView budgetJob;
@@ -226,8 +226,8 @@ public class TransporterPort implements TransporterPortType {
 
 	@Override
 	public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
-    MessageContext messageContext = webServiceContext.getMessageContext();
-    messageContext.put("transporterName", name);
+    /*MessageContext messageContext = webServiceContext.getMessageContext();
+    messageContext.put("transporterName", name);*/
 		if(id == null || id.equals("")){ 
 			BadJobFault faultInfo = new BadJobFault();
 			throw new BadJobFault_Exception("Empty or null job id", faultInfo);
@@ -261,8 +261,8 @@ public class TransporterPort implements TransporterPortType {
 
 	@Override
 	public JobView jobStatus(String id) {
-    MessageContext messageContext = webServiceContext.getMessageContext();
-    messageContext.put("transporterName", name);
+    /*MessageContext messageContext = webServiceContext.getMessageContext();
+    messageContext.put("transporterName", name);*/
 	  if(id==null){
 	    return null;
 	  }
@@ -283,8 +283,8 @@ public class TransporterPort implements TransporterPortType {
 	@Override
 	public List<JobView> listJobs() {
 		//TODO see if this is safe or if we need to return something else
-    MessageContext messageContext = webServiceContext.getMessageContext();
-    messageContext.put("transporterName", name);
+    /*MessageContext messageContext = webServiceContext.getMessageContext();
+    messageContext.put("transporterName", name);*/
 		return jobs;
 	}
 
