@@ -68,8 +68,13 @@ public class BrokerApplication {
         String secondaryBrokerAddress = uddiNaming.lookup("UpaBroker2");
         broker.addSecondaryBroker(secondaryBrokerAddress);
       }
+      if(primaryBroker) { // TODO remove 1 from broker
+        uddiNaming.rebind(name.substring(0, name.length()-1), url);
+      }
+      else {
+        uddiNaming.rebind(name, url);
+      }
       
-      uddiNaming.rebind(name, url);
       //wait
       System.out.println("Awating connections");
       System.out.println("Press enter to shutdown");

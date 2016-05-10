@@ -125,6 +125,9 @@ public class BrokerPort implements BrokerPortType {
     priceIsValid(price);
 
     TransportView transport = createTransport(origin, destination);
+    if(secondaryBroker!=null){
+      secondaryBroker.updateBackup(transport);
+    }
 
     for(TransporterPortType transporter: transporters){
       JobView requested_job;
@@ -164,6 +167,10 @@ public class BrokerPort implements BrokerPortType {
     }
 
     updateTransport(transport, bestTransporter, bestJob);
+    if(secondaryBroker!=null){
+      secondaryBroker.updateBackup(transport);
+    }
+    
     try {
       bestTransporter.decideJob(bestJob.getJobIdentifier(), true);
     } catch (BadJobFault_Exception e) {
@@ -179,6 +186,10 @@ public class BrokerPort implements BrokerPortType {
           System.out.println(e.getMessage());
         }
       }
+    }
+    
+    if(secondaryBroker!=null){
+      secondaryBroker.updateBackup(transport);
     }
     return transport.getId();
   }
@@ -331,6 +342,7 @@ public class BrokerPort implements BrokerPortType {
   
   @Override
   public void updateBackup(TransportView tv){
+    System.out.println("updating transport with id: "+tv.getId());
     if(!primaryBroker){
       try{
         TransportView tmp = viewTransport(tv.getId());
@@ -367,10 +379,6 @@ public class BrokerPort implements BrokerPortType {
     if(primaryBroker){
       MyTimerTask sendLifeProof = new MyTimerTask();
       timer.schedule(sendLifeProof, 1000, 1000);
-    }
-    else{
-      // primBrokerDied = new MyTakeoverTimer();
-      // takeovertimer.schedule(primBrokerDied, 3000);
     }
   }
   
