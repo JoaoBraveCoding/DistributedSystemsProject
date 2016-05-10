@@ -80,13 +80,13 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         //get random for nonce
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte nonce[] = new byte[16];
-        //random.nextBytes(nonce);
-        Arrays.fill(nonce, (byte)1);
+        random.nextBytes(nonce);
+        //Arrays.fill(nonce, (byte)1);
         
-        /*//dont send the same nonce
+        //dont send the same nonce
         while(noncesSent.containsKey(printBase64Binary(nonce))) {
           random.nextBytes(nonce);
-        }*/
+        }
         
         //add nonce to hash of nonces sent
         noncesSent.put(printBase64Binary(nonce), "transp");
