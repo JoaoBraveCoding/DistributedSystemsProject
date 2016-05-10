@@ -9,7 +9,7 @@ import pt.upa.broker.ws.BrokerPort;
 
 public class BrokerApplication {
   private static BrokerPort broker;
-	public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
     //Check arguments
     if (args.length < 3) {
       System.err.println("Argument(s) misssing!");
@@ -17,13 +17,13 @@ public class BrokerApplication {
     }
 
     System.out.println(BrokerApplication.class.getSimpleName() + " starting...");
-  		    
+
     String uddiURL = args[0];
     String name    = args[1];
     String url     = args[2];
     //String ca   = args[3];
     String number = args[4];
-    
+
     boolean primaryBroker = false;
     if(number.equals("1")){
       System.out.println("I'm a primary broker");
@@ -31,48 +31,53 @@ public class BrokerApplication {
     } else {
       System.out.println("I'm a secondary broker");
     }
-    
+
     Endpoint endpoint = null;
     UDDINaming uddiNaming = null;
     try {
-      broker = new BrokerPort(primaryBroker);
+      broker = new BrokerPort();
+      broker.setBrokerType(primaryBroker);
       endpoint = Endpoint.create(broker); // TODO check if successful
-      
+
       //publish endpoint
       System.out.printf("Starting %s%n", url);
       endpoint.publish(url);
-      
-      
+
+
       //publish to UDDI
       System.out.printf("publishing '%s' to UDDI at %s%n", name, uddiURL);
       uddiNaming = new UDDINaming(uddiURL);
-      
+
       Collection<String> resultUDDIList;
       resultUDDIList = uddiNaming.list("UpaTransporter%");
       if(resultUDDIList == null || resultUDDIList.isEmpty()){
         System.out.println("Did not get a list of transporters from UDDI");
       }
-      
+
       //Adding transporters to broker
       System.out.println("Adding transporters...");
       for(String s : resultUDDIList)
         broker.addTransporter(s, uddiNaming);
-      
+
       //Adding ca to broker
       //String caEndpointAddress = uddiNaming.lookup(ca); 
       //broker.addCa(caEndpointAddress);
+
+      if(primaryBroker){
+        System.out.println("Adding secondary broker...");
+        String secondBrokerAddress = uddiNaming.lookup("UpaBroker2");
+      }
       
       uddiNaming.rebind(name, url);
-
       //wait
       System.out.println("Awating connections");
       System.out.println("Press enter to shutdown");
       System.in.read();
-      
+
     } catch(Exception e) {
       System.out.printf("Caught exception: %s%n", e);
       e.printStackTrace();
-    
+
     } finally {
       try {
         if (endpoint != null) {
@@ -88,9 +93,9 @@ public class BrokerApplication {
           // delete from uddi
           uddiNaming.unbind(name);
           System.out.printf("Deleted '%s' from UDDI%n", name);
-          }    
-        } catch (Exception e) {
-          System.out.printf("Caught exception when deleting: %s%n", e);
+        }    
+      } catch (Exception e) {
+        System.out.printf("Caught exception when deleting: %s%n", e);
       }
     }
   }

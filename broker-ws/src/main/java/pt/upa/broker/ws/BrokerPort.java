@@ -41,9 +41,9 @@ public class BrokerPort implements BrokerPortType {
   Timer timer = new Timer();
   Timer takeovertimer = new Timer();
   MyTakeoverTimer primBrokerDied;
-  boolean primaryBroker;
+  boolean primaryBroker = false;
 
-  public BrokerPort(boolean primBroker) {
+  public BrokerPort() {
     super();
     // adding known places 
     places.put("Porto", "North");
@@ -66,16 +66,7 @@ public class BrokerPort implements BrokerPortType {
     places.put("Portalegre", "South");
     places.put("Beja", "South");
     places.put("Faro", "South");
-    primaryBroker = primBroker;
     
-    if(primaryBroker){
-      MyTimerTask sendLifeProof = new MyTimerTask();
-      timer.schedule(sendLifeProof, 2000, 2000);
-    }
-    else{
-      primBrokerDied = new MyTakeoverTimer();
-      takeovertimer.schedule(primBrokerDied, 2500);
-    }
   }
   
   public class MyTimerTask extends TimerTask {
@@ -346,6 +337,18 @@ public class BrokerPort implements BrokerPortType {
     old.setPrice(young.getPrice());
     old.setTransporterCompany(young.getTransporterCompany());
     old.setState(young.getState());
+  }
+
+  public void setBrokerType(boolean primary) {
+    primaryBroker = primary;
+    if(primaryBroker){
+      MyTimerTask sendLifeProof = new MyTimerTask();
+      timer.schedule(sendLifeProof, 2000, 2000);
+    }
+    else{
+      primBrokerDied = new MyTakeoverTimer();
+      takeovertimer.schedule(primBrokerDied, 2500);
+    }
   }
 
 }
