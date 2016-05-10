@@ -6,7 +6,6 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -29,17 +28,6 @@ import pt.upa.ws.SecurityFunctions;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
-/**
- *  This SOAPHandler shows how to set/get values from headers in
- *  inbound/outbound SOAP messages.
- *
- *  A header is created in an outbound message and is read on an
- *  inbound message.
- *
- *  The value that is read from the header
- *  is placed in a SOAP message context property
- *  that can be accessed by other handlers or by the application.
- */
 public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
   public static final String CONTEXT_PROPERTY = "transporterName";
@@ -214,8 +202,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         
         //computing digest
         byte[] computedDigest = SecurityFunctions.digestBroker(bodyText, nonce);
-        
-        
+         
         // *** #5 ***
         // put token in request context
         String newValue = "Give me your name";
@@ -225,14 +212,12 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         // access property
         smc.setScope(CONTEXT_PROPERTY, Scope.APPLICATION);
         
-
         // verify - should the signature be already decrypted or does the function do that?
         if(!SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyBroker)){
           System.out.println("Wrong digital signature.");
           return false;
         }
         
-
       }
     } catch (Exception e) {
       System.out.print("Caught exception in handleMessage: ");

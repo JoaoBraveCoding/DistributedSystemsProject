@@ -15,6 +15,7 @@ import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
+import javax.xml.ws.ProtocolException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.MessageContext.Scope;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
@@ -111,44 +112,62 @@ public class HeaderHandlerTest extends AbstractHandlerTest {
         //soapMessage.writeTo(System.out);
     }
 
-  /*  @Test
+    @Test
     public void testHeaderHandlerInbound(
         @Mocked final SOAPMessageContext soapMessageContext)
         throws Exception {
 
-        // Preparation code not specific to JMockit, if any.
-        final String soapText = HELLO_SOAP_REQUEST.replace("<SOAP-ENV:Header/>",
-            "<SOAP-ENV:Header>" +
-            "<d:myHeader xmlns:d=\"http://demo\">22</d:myHeader>" +
-            "</SOAP-ENV:Header>");
-        //System.out.println(soapText);
+      // Preparation code not specific to JMockit, if any.
+      final String soapText = RT_SOAP_RESPONSE;
 
-        final SOAPMessage soapMessage = byteArrayToSOAPMessage(soapText.getBytes());
-        final Boolean soapOutbound = false;
+      final SOAPMessage soapMessage = byteArrayToSOAPMessage(soapText.getBytes());
+      final Boolean soapOutbound = false;
 
-        // an "expectation block"
-        // One or more invocations to mocked types, causing expectations to be recorded.
-        new StrictExpectations() {{
-            soapMessageContext.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-            result = soapOutbound;
+      // an "expectation block"
+      // One or more invocations to mocked types, causing expectations to be recorded.
+      new StrictExpectations() {{
+          soapMessageContext.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+          result = soapOutbound;
 
-            soapMessageContext.getMessage();
-            result = soapMessage;
+          soapMessageContext.getMessage();
+          result = soapMessage;
+      }};
 
-            soapMessageContext.put(HeaderHandler.CONTEXT_PROPERTY, 22);
-            soapMessageContext.setScope(HeaderHandler.CONTEXT_PROPERTY, Scope.APPLICATION);
-        }};
+      // Unit under test is exercised.
+      HeaderHandler handler = new HeaderHandler();
+      boolean handleResult = handler.handleMessage(soapMessageContext);
 
-        // Unit under test is exercised.
-        HeaderHandler handler = new HeaderHandler();
-        boolean handleResult = handler.handleMessage(soapMessageContext);
+      // assert that message would proceed normally
+      assertTrue(handleResult);
 
-        // Additional verification code, if any, either here or before the verification block.
-
-        // assert that message would proceed normally
-        assertTrue(handleResult);
-
-        //soapMessage.writeTo(System.out);
+      //soapMessage.writeTo(System.out);
     }
-*/
+
+    @Test(expected = ProtocolException.class)
+    public void testHeaderHandlerInboundTampered(
+        @Mocked final SOAPMessageContext soapMessageContext)
+        throws Exception {
+
+      // Preparation code not specific to JMockit, if any.
+      final String soapText = RT_SOAP_RESPONSE_TAMPERED;
+
+      final SOAPMessage soapMessage = byteArrayToSOAPMessage(soapText.getBytes());
+      final Boolean soapOutbound = false;
+
+      // an "expectation block"
+      // One or more invocations to mocked types, causing expectations to be recorded.
+      new StrictExpectations() {{
+          soapMessageContext.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+          result = soapOutbound;
+
+          soapMessageContext.getMessage();
+          result = soapMessage;
+      }};
+
+      // Unit under test is exercised.
+      HeaderHandler handler = new HeaderHandler();
+      boolean handleResult = handler.handleMessage(soapMessageContext);
+
+      //soapMessage.writeTo(System.out);
+    }
 }

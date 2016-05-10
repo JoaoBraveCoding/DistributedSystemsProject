@@ -3,10 +3,7 @@ package pt.upa.ws;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,17 +15,7 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 
-import static javax.xml.bind.DatatypeConverter.printBase64Binary;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
-import org.junit.validator.PublicClassValidator;
 
 public class SecurityFunctions {
   
@@ -191,15 +178,6 @@ public class SecurityFunctions {
       certificate.verify(caPublicKey);
     } catch (InvalidKeyException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException
         | SignatureException e) {
-      // O método Certifecate.verify() não retorna qualquer valor (void).
-      // Quando um certificado é inválido, isto é, não foi devidamente
-      // assinado pela CA
-      // é lançada uma excepção: java.security.SignatureException:
-      // Signature does not match.
-      // também são lançadas excepções caso o certificado esteja num
-      // formato incorrecto ou tenha uma
-      // chave inválida.
-
       return false;
     }
     return true;

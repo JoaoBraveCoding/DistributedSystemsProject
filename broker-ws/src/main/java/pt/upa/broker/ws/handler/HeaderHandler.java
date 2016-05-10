@@ -1,7 +1,6 @@
 package pt.upa.broker.ws.handler;
 
 import java.io.ByteArrayInputStream;
-import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -32,17 +31,6 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 import pt.upa.ca.ws.cli.CaClient;
 
-/**
- *  This SOAPHandler shows how to set/get values from headers in
- *  inbound/outbound SOAP messages.
- *
- *  A header is created in an outbound message and is read on an
- *  inbound message.
- *
- *  The value that is read from the header
- *  is placed in a SOAP message context property
- *  that can be accessed by other handlers or by the application.
- */
 public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   
   private HashMap<String, HashMap<String, Boolean>> usedNonces = new HashMap<String, HashMap<String, Boolean>>();

@@ -3,8 +3,8 @@
         <handler>
             <handler-class>pt.upa.broker.ws.handler.HeaderHandler</handler-class>
         </handler>
-      <!--   <handler>
+        <handler>
             <handler-class>example.ws.handler.LoggingHandler</handler-class>
-        </handler>  -->
+        </handler>
     </handler-chain>
 </handler-chains>
