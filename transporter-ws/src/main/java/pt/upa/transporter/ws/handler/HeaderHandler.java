@@ -6,6 +6,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -40,7 +41,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
  */
 public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
-  public static final String CONTEXT_PROPERTY = "my.property";
+  public static final String CONTEXT_PROPERTY = "transporterName";
   
   //
   // Handler interface methods
@@ -76,24 +77,21 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         //get random for nonce
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte nonce[] = new byte[16];
-        random.nextBytes(nonce);
+        //random.nextBytes(nonce);
+        Arrays.fill(nonce, (byte)1);
         
         // add header
         SOAPHeader sh = se.getHeader();
         if (sh == null)
           sh = se.addHeader();
                
-//----  
         //UpaTransporterX should be in context
-        //String transporterNameText = (String) smc.get("transporterName");
-        String transporterNameText = "UpaTransporter2";      
+        String transporterNameText = (String) smc.get(CONTEXT_PROPERTY);
         
         // set transporter element
         Name transporterName = se.createName("transporter", "e", "urn:upa");
         SOAPHeaderElement transporterElement = sh.addHeaderElement(transporterName);
         transporterElement.addTextNode(transporterNameText);
-
-//----
         
         //make digest
         byte[] digest = SecurityFunctions.digestTransporter(plainText, nonce, transporterNameText);
@@ -136,8 +134,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         }
         SOAPElement element = (SOAPElement) it.next();
         String bodyText = element.getTextContent();                
-
-        System.out.println(bodyText + "   -------");
         
         // check header
         if (sh == null) {
@@ -198,6 +194,17 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         
         //computing digest
         byte[] computedDigest = SecurityFunctions.digestBroker(bodyText, nonce);
+        
+        
+        // *** #5 ***
+        // put token in request context
+        String newValue = "Give me your name";
+        System.out.printf("%s put token '%s' on request context%n", "transporter-handler", newValue);
+        smc.put(CONTEXT_PROPERTY, newValue);
+        // set property scope to application so that server class can
+        // access property
+        smc.setScope(CONTEXT_PROPERTY, Scope.APPLICATION);
+        
 
         // verify - should the signature be already decrypted or does the function do that?
         if(!SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyBroker)){

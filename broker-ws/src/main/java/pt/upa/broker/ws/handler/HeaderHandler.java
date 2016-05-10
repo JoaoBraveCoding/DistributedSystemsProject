@@ -7,7 +7,9 @@ import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -42,6 +44,9 @@ import pt.upa.ca.ws.cli.CaClient;
  */
 public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   
+  private HashMap<String, HashMap<String, Boolean>> usedNonces = new HashMap<String, HashMap<String, Boolean>>();
+
+  
   //
   // Handler interface methods
   //
@@ -53,6 +58,9 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
     System.out.println("HeaderHandler: Handling message.");
 
     CaClient client = null;
+    
+    
+    
     try {
       client = new CaClient ("http://localhost:9090","UpaCa");
     } catch (Exception e1) {
@@ -60,7 +68,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
     }
     
     Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-
+    
     try {
       if (outboundElement.booleanValue()) {
         System.out.println("Writing header in outbound SOAP message...");
@@ -79,15 +87,12 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         }
         SOAPElement element = (SOAPElement) it.next();
         String plainText = element.getTextContent();
-        
-        System.out.println(plainText + "   PLAINTEXT");
-        
+                
         //get random for nonce
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte nonce[] = new byte[16];
         random.nextBytes(nonce);
                
-        System.out.println(plainText + "  " + nonce + "   PLAINTEXT  & NONCE");
         //make digest
         byte[] digest = SecurityFunctions.digestBroker(plainText, nonce);
 
@@ -103,8 +108,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
         //turn signature into text
         String textSignature = printBase64Binary(signature);
-
-        System.out.println(Arrays.equals(parseBase64Binary(textSignature), signature) +  "  signature  textVSbytes");
         
         // get first header element TODO what's with the e?
         Name signatureName = se.createName("signature", "e", "urn:upa");
@@ -118,8 +121,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         SOAPHeaderElement nonceElement = sh.addHeaderElement(nonceName);
         nonceElement.addTextNode(textNonce);
 
-        System.out.println(Arrays.equals(parseBase64Binary(textNonce),nonce) +  "    Nonce textVSbytes");
-
         
         //get certificate from CA
         String textBrokerCertificate = client.requestCertificate("UpaBroker");
@@ -131,7 +132,9 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
       } else {
         System.out.println("Reading header in inbound SOAP message...");
-
+        if(smc.SERVLET_REQUEST != null){
+          return true;
+        }
 
         // get SOAP envelope header
         SOAPMessage msg = smc.getMessage();
@@ -200,7 +203,27 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
         // get header element value
         String transporterText = transporterElement.getValue();
-
+        /*
+        for(Entry<byte[], HashMap<String, Boolean>> entry : usedNonces.entrySet()){
+          byte[] key = entry.getKey();
+          System.out.println(Arrays.equals(key, nonce)+ " - -----");
+          HashMap<String, Boolean> value = entry.getValue();
+          System.out.println(value.containsKey(transporterText));
+        }*/
+        
+        System.out.println(usedNonces.containsKey(nonceText) + "  ------");
+        
+        if(usedNonces.containsKey(nonceText) && usedNonces.get(nonceText).containsKey(transporterText)){
+          System.out.println("Nonce element already used");
+          return false;
+        }
+        
+        if(!usedNonces.containsKey(nonceText)) {
+          usedNonces.put(nonceText, new HashMap<String, Boolean>());
+        }
+        
+        usedNonces.get(nonceText).put(transporterText, true);
+        
         //get certificate from CA
         String transporterCertificateText = client.requestCertificate(transporterText);
         byte[] byteCertificate = parseBase64Binary(transporterCertificateText);
@@ -212,7 +235,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         byte[] computedDigest = SecurityFunctions.digestTransporter(bodyText, nonce, transporterText);
 
         //Fazer o verify - should the signature be already decrypted or does the function do that?
-        if(!SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyTransporter)){
+        if(SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyTransporter)){
           System.out.println("Wrong digital signature.");
           return false;
         }

@@ -5,18 +5,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.annotation.Resource;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
-import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
-import com.sun.xml.ws.api.server.LazyMOMProvider.Scope;
+import pt.upa.transporter.ws.handler.HeaderHandler;
+
+
+
 
 
 
@@ -119,8 +120,7 @@ public class TransporterPort implements TransporterPortType {
 
 	@Override
 	public String ping(String name) {
-/*    MessageContext messageContext = webServiceContext.getMessageContext();
-    messageContext.put("transporterName", name);*/
+	  putTransporterNameInContext();
 		System.out.println("Received Ping from " + name);
 		return "Pong " + name + "!";
 	}
@@ -128,10 +128,7 @@ public class TransporterPort implements TransporterPortType {
 	@Override
 	public JobView requestJob(String origin, String destination, int price)
 			throws BadLocationFault_Exception, BadPriceFault_Exception {
-	  
-	  /*    MessageContext messageContext = webServiceContext.getMessageContext();
-    messageContext.put("transporterName", name);*/
-    
+	  putTransporterNameInContext();
 	  System.out.println(origin + " destination: " + destination + " price: " + price);
 	  
 		JobView budgetJob;
@@ -230,8 +227,7 @@ public class TransporterPort implements TransporterPortType {
 
 	@Override
 	public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
-    /*MessageContext messageContext = webServiceContext.getMessageContext();
-    messageContext.put("transporterName", name);*/
+	  putTransporterNameInContext();
 		if(id == null || id.equals("")){ 
 			BadJobFault faultInfo = new BadJobFault();
 			throw new BadJobFault_Exception("Empty or null job id", faultInfo);
@@ -265,8 +261,7 @@ public class TransporterPort implements TransporterPortType {
 
 	@Override
 	public JobView jobStatus(String id) {
-    /*MessageContext messageContext = webServiceContext.getMessageContext();
-    messageContext.put("transporterName", name);*/
+	  putTransporterNameInContext();
 	  if(id==null){
 	    return null;
 	  }
@@ -287,8 +282,7 @@ public class TransporterPort implements TransporterPortType {
 	@Override
 	public List<JobView> listJobs() {
 		//TODO see if this is safe or if we need to return something else
-    /*MessageContext messageContext = webServiceContext.getMessageContext();
-    messageContext.put("transporterName", name);*/
+	  putTransporterNameInContext();
 		return jobs;
 	}
 
@@ -300,6 +294,22 @@ public class TransporterPort implements TransporterPortType {
 
 	public int getIdentifier(){
 		return identifierCounter;
+	}
+	
+	public void putTransporterNameInContext(){
+	  // retrieve message context
+    if(webServiceContext != null) {
+      MessageContext messageContext = webServiceContext.getMessageContext();
+      // *** #6 ***
+      // get token from message context
+      String propertyValue = (String) messageContext.get(HeaderHandler.CONTEXT_PROPERTY);
+      System.out.printf("%s got token '%s' from response context%n", "transporter", propertyValue);
+  
+      // *** #7 ***
+      // put token in message context
+      System.out.printf("%s put token '%s' on request context%n", "transporter", this.name);
+      messageContext.put(HeaderHandler.CONTEXT_PROPERTY, this.name);
+    }
 	}
 
 	public void stopTimer(){

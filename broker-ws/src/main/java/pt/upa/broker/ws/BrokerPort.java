@@ -77,6 +77,7 @@ public class BrokerPort implements BrokerPortType {
     //Pinging transporters 
     System.out.println("Pingging transporters");
     for(TransporterPortType port : transporters){
+      
       returnValue = port.ping("Broker");
       if (returnValue.equals("Pong Broker!")){
         counter++;
