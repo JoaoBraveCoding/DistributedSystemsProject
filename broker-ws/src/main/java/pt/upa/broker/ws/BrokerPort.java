@@ -37,6 +37,7 @@ public class BrokerPort implements BrokerPortType {
   private List<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
   private List<TransportView>    	transports   = new ArrayList<TransportView>();
   private Map<String, String> places = new HashMap<String, String>();
+  private BrokerPortType secondaryBroker = null;
   private int identifierCounter = 0;
   Timer timer = new Timer();
   Timer takeovertimer = new Timer();
@@ -73,7 +74,9 @@ public class BrokerPort implements BrokerPortType {
 
     @Override
     public void run(){
-      imAlive("Still here baby..shh it's fine");
+      if(secondaryBroker!=null){
+        secondaryBroker.imAlive("Still here baby..shh it's fine");
+      }
     }
   }
   
@@ -310,6 +313,21 @@ public class BrokerPort implements BrokerPortType {
     transporters.add(port);
   }
   
+  public void addSecondaryBroker(String secondaryBrokerAddress) {
+    if (secondaryBrokerAddress == null) {
+      System.out.println("Not found!");
+      return;
+    }
+    BrokerService service = new BrokerService();
+    BrokerPortType port = service.getBrokerPort();
+
+    BindingProvider bindingProvider = (BindingProvider) port;
+    Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, secondaryBrokerAddress);
+    
+    secondaryBroker = port;
+  }
+  
   @Override
   public void updateBackup(TransportView tv){
     if(!primaryBroker){
@@ -350,5 +368,7 @@ public class BrokerPort implements BrokerPortType {
       takeovertimer.schedule(primBrokerDied, 2500);
     }
   }
+
+
 
 }

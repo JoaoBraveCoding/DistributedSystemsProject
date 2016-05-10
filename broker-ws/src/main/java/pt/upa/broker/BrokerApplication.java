@@ -65,7 +65,8 @@ public class BrokerApplication {
 
       if(primaryBroker){
         System.out.println("Adding secondary broker...");
-        String secondBrokerAddress = uddiNaming.lookup("UpaBroker2");
+        String secondaryBrokerAddress = uddiNaming.lookup("UpaBroker2");
+        broker.addSecondaryBroker(secondaryBrokerAddress);
       }
       
       uddiNaming.rebind(name, url);
