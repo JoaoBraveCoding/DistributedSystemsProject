@@ -11,7 +11,7 @@ public class BrokerApplication {
   private static BrokerPort broker;
 	public static void main(String[] args) throws Exception {
     //Check arguments
-    if (args.length < 4) {
+    if (args.length < 3) {
       System.err.println("Argument(s) misssing!");
       System.err.printf("Usage: java %s uddiURL wsName wsURL ca-wsName%n", BrokerApplication.class.getName());
     }
@@ -21,7 +21,7 @@ public class BrokerApplication {
     String uddiURL = args[0];
     String name    = args[1];
     String url     = args[2];
-    String ca   = args[3];
+    //String ca   = args[3];
     
     Endpoint endpoint = null;
     UDDINaming uddiNaming = null;
@@ -49,8 +49,8 @@ public class BrokerApplication {
         broker.addTransporter(s, uddiNaming);
       
       //Adding ca to broker
-      String caEndpointAddress = uddiNaming.lookup(ca); 
-      broker.addCa(caEndpointAddress);
+      //String caEndpointAddress = uddiNaming.lookup(ca); 
+      //broker.addCa(caEndpointAddress);
       
       uddiNaming.rebind(name, url);
 

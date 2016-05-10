@@ -77,8 +77,8 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         //get random for nonce
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte nonce[] = new byte[16];
-        //random.nextBytes(nonce);
-        Arrays.fill(nonce, (byte)1);
+        random.nextBytes(nonce);
+        //Arrays.fill(nonce, (byte)1);
         
         // add header
         SOAPHeader sh = se.getHeader();
