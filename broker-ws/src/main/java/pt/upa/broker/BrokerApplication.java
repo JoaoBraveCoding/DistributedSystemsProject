@@ -35,7 +35,7 @@ public class BrokerApplication {
     Endpoint endpoint = null;
     UDDINaming uddiNaming = null;
     try {
-      broker = new BrokerPort();
+      broker = new BrokerPort(primaryBroker);
       endpoint = Endpoint.create(broker); // TODO check if successful
       
       //publish endpoint
