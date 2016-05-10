@@ -75,7 +75,7 @@ public class BrokerPort implements BrokerPortType {
     @Override
     public void run(){
       if(secondaryBroker!=null){
-        secondaryBroker.imAlive("Still here baby..shh it's fine");
+        secondaryBroker.imAlive("El Capitan is still alive. I shall wait for my turn.");
       }
     }
   }
@@ -85,6 +85,7 @@ public class BrokerPort implements BrokerPortType {
     @Override
     public void run(){
       //takeover
+      System.out.println("MY TURN!!! MUAHAHAHAHAHAHAH!!");
     }
   }
 
@@ -341,11 +342,15 @@ public class BrokerPort implements BrokerPortType {
   }
   
   @Override
-  public void imAlive(String foo){
+  public void imAlive(String arg){
+    System.out.println(arg);
     if(!primaryBroker){
       //reset timer to take over
-      takeovertimer.cancel();
-      takeovertimer.schedule(primBrokerDied, 2500);
+      if(primBrokerDied!=null){
+        primBrokerDied.cancel();
+      }
+      primBrokerDied = new MyTakeoverTimer();
+      takeovertimer.schedule(primBrokerDied, 2000);
     }
   }
   
@@ -361,11 +366,11 @@ public class BrokerPort implements BrokerPortType {
     primaryBroker = primary;
     if(primaryBroker){
       MyTimerTask sendLifeProof = new MyTimerTask();
-      timer.schedule(sendLifeProof, 2000, 2000);
+      timer.schedule(sendLifeProof, 1000, 1000);
     }
     else{
-      primBrokerDied = new MyTakeoverTimer();
-      takeovertimer.schedule(primBrokerDied, 2500);
+      // primBrokerDied = new MyTakeoverTimer();
+      // takeovertimer.schedule(primBrokerDied, 3000);
     }
   }
 
