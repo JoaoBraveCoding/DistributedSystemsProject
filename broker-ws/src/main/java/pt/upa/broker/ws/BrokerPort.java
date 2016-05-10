@@ -39,6 +39,8 @@ public class BrokerPort implements BrokerPortType {
   private Map<String, String> places = new HashMap<String, String>();
   private int identifierCounter = 0;
   Timer timer = new Timer();
+  Timer takeovertimer = new Timer();
+  MyTakeoverTimer primBrokerDied;
   boolean primaryBroker;
 
   public BrokerPort(boolean primBroker) {
@@ -70,6 +72,10 @@ public class BrokerPort implements BrokerPortType {
       MyTimerTask sendLifeProof = new MyTimerTask();
       timer.schedule(sendLifeProof, 2000, 2000);
     }
+    else{
+      primBrokerDied = new MyTakeoverTimer();
+      takeovertimer.schedule(primBrokerDied, 2500);
+    }
   }
   
   public class MyTimerTask extends TimerTask {
@@ -77,6 +83,14 @@ public class BrokerPort implements BrokerPortType {
     @Override
     public void run(){
       imAlive("Still here baby..shh it's fine");
+    }
+  }
+  
+  public class MyTakeoverTimer extends TimerTask {
+
+    @Override
+    public void run(){
+      //takeover
     }
   }
 
@@ -307,17 +321,23 @@ public class BrokerPort implements BrokerPortType {
   
   @Override
   public void updateBackup(TransportView tv){
-    try{
-      TransportView tmp = viewTransport(tv.getId());
-      copyTransportView(tmp, tv);
-    } catch (UnknownTransportFault_Exception e){
-      transports.add(tv);
+    if(!primaryBroker){
+      try{
+        TransportView tmp = viewTransport(tv.getId());
+        copyTransportView(tmp, tv);
+      } catch (UnknownTransportFault_Exception e){
+        transports.add(tv);
+      }
     }
   }
   
   @Override
   public void imAlive(String foo){
-    
+    if(!primaryBroker){
+      //reset timer to take over
+      takeovertimer.cancel();
+      takeovertimer.schedule(primBrokerDied, 2500);
+    }
   }
   
   private void copyTransportView(TransportView old, TransportView young){

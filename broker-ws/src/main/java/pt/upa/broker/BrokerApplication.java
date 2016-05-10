@@ -35,7 +35,7 @@ public class BrokerApplication {
     Endpoint endpoint = null;
     UDDINaming uddiNaming = null;
     try {
-      broker = new BrokerPort();
+      broker = new BrokerPort(primaryBroker);
       endpoint = Endpoint.create(broker); // TODO check if successful
       
       //publish endpoint
@@ -53,7 +53,7 @@ public class BrokerApplication {
         System.out.println("Did not get a list of transporters from UDDI");
       }
       
-      //Adding transporter to broker
+      //Adding transporters to broker
       System.out.println("Adding transporters...");
       for(String s : resultUDDIList)
         broker.addTransporter(s, uddiNaming);
