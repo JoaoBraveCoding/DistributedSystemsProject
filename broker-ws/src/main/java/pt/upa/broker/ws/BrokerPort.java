@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.xml.registry.JAXRException;
 import javax.xml.ws.BindingProvider;
@@ -29,6 +30,7 @@ import pt.upa.transporter.ws.TransporterService;
     targetNamespace="http://ws.broker.upa.pt/",
     serviceName="BrokerService"
     )
+@HandlerChain(file = "/handler-chain.xml")
 public class BrokerPort implements BrokerPortType {
 
   private List<TransporterPortType> transporters = new ArrayList<TransporterPortType>();

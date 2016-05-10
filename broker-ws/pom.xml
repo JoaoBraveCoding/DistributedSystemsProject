@@ -20,6 +20,8 @@
 
         <wsdl.directory>src/main/resources</wsdl.directory>
         <wsdl.filename>broker.1_0.wsdl</wsdl.filename>
+        <wsdl.filename1>transporter.1_0.wsdl</wsdl.filename1>
+        
 
         <mainclass>pt.upa.broker.BrokerApplication</mainclass>
 
@@ -56,12 +58,6 @@
             <groupId>pt.ulisboa.tecnico.sdis</groupId>
             <artifactId>uddi-naming</artifactId>
             <version>1.0</version>
-        </dependency>
-        <!-- transporter-ws-cli -->
-        <dependency>
-            <groupId>pt.upa.a44</groupId>
-            <artifactId>transporter-ws-cli</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <!-- ca-ws-cli -->
         <dependency>
@@ -114,6 +110,7 @@
                     <wsdlDirectory>${wsdl.directory}</wsdlDirectory>
                     <wsdlFiles>
                         <wsdlFile>${wsdl.filename}</wsdlFile>
+                        <wsdlFile>${wsdl.filename1}</wsdlFile>
                     </wsdlFiles>
                 </configuration>
                 <dependencies>

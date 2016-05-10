@@ -6,10 +6,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -45,7 +43,6 @@ import pt.upa.ca.ws.cli.CaClient;
 public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   
   private HashMap<String, HashMap<String, Boolean>> usedNonces = new HashMap<String, HashMap<String, Boolean>>();
-
   
   //
   // Handler interface methods
@@ -179,7 +176,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
         if (!it.hasNext()) {
           System.out.println("Nonce element not found.");
-          return false;
+          return true;
         }
         SOAPElement nonceElement = (SOAPElement) it.next();
 
@@ -233,7 +230,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         byte[] computedDigest = SecurityFunctions.digestTransporter(bodyText, nonce, transporterText);
 
         //Fazer o verify - should the signature be already decrypted or does the function do that?
-        if(SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyTransporter)){
+        if(!SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyTransporter)){
           System.out.println("Wrong digital signature.");
           return false;
         }

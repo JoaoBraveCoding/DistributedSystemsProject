@@ -15,7 +15,7 @@ import org.junit.BeforeClass;
 /**
  *  Abstract handler test suite
  */
-public abstract class AbstractHandlerTest {
+public abstract class AbstractHandlerTest{
 
     // static members
 
@@ -33,15 +33,8 @@ public abstract class AbstractHandlerTest {
        "</S:Body></S:Envelope>";
 
     /** request-transport SOAP response message captured with LoggingHandler */
-    protected static final String RT_SOAP_RESPONSE ="<S:Envelope " +
-        "xmlns:S=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
-        "xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
-        "<SOAP-ENV:Header/>" +
-        "<S:Body>" +
-        "<ns2:requestTransportResponse xmlns:ns2=\"http://ws.broker.upa.pt/\">" +
-        "<return>1</return>" +
-        "</ns2:requestTransportResponse>" +
-        "</S:Body></S:Envelope>";
+    protected static final String RT_SOAP_RESPONSE = "<S:Envelope ";
+
 
 
     /** SOAP message factory */

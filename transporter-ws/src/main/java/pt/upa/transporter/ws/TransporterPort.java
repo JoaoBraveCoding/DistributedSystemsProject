@@ -16,11 +16,6 @@ import javax.xml.ws.handler.MessageContext;
 
 import pt.upa.transporter.ws.handler.HeaderHandler;
 
-
-
-
-
-
 @WebService(
 		endpointInterface="pt.upa.transporter.ws.TransporterPortType",
 		wsdlLocation="transporter.1_0.wsdl",

@@ -8,7 +8,7 @@ import org.junit.BeforeClass;
 import pt.upa.broker.ws.cli.BrokerClient;
 import pt.upa.broker.ws.exception.UnknownServiceException;
 
-public abstract class AbstractBrokerIT {
+public abstract class AbstractBrokerIT  {
   protected static BrokerClient client;
   private static String wsName  = "UpaBroker";
   private static String uddiURL = "http://localhost:9090";
