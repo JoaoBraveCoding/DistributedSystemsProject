@@ -89,7 +89,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         }
         
         //add nonce to hash of nonces sent
-        noncesSent.put(printBase64Binary(nonce), "transp");
+        noncesSent.put(printBase64Binary(nonce), "Transporter");
         
         // add header
         SOAPHeader sh = se.getHeader();
@@ -110,7 +110,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         //encrypt digest = signature
         PrivateKey privKey = SecurityFunctions.getPrivateKeyFromKeystore("keys/"+ transporterNameText + ".jks", "passwd".toCharArray(), transporterNameText, "passwd".toCharArray());
         byte[] signature = SecurityFunctions.makeDigitalSignature(digest, privKey);
-
 
         //turn signature into text
         String textSignature = printBase64Binary(signature);
@@ -188,7 +187,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         
         //change nonce to byte
         byte[] nonce = parseBase64Binary(nonceText);
-//--
+
         // get certificate element
         Name certificate = se.createName("certificate", "e", "urn:upa");
         it = sh.getChildElements(certificate);
@@ -207,6 +206,10 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         byte[] byteCertificate   = parseBase64Binary(certificateText);
         CertificateFactory cf    = CertificateFactory.getInstance("X.509");
         Certificate certificate1 = cf.generateCertificate(new ByteArrayInputStream(byteCertificate));
+        
+        Certificate caCertificate = SecurityFunctions.getCaCertificateFromKeystore("keys/UpaTransporter1.jks", "passwd".toCharArray());
+        certificate1.verify(caCertificate.getPublicKey());
+        
         PublicKey pubKeyBroker   = SecurityFunctions.getPublicKeyFromCertificate(certificate1);
         
         //computing digest

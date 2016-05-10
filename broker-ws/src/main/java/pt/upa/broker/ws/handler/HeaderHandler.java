@@ -1,6 +1,7 @@
 package pt.upa.broker.ws.handler;
 
 import java.io.ByteArrayInputStream;
+import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -23,6 +24,8 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
+import javax.xml.ws.ProtocolException;
+
 import pt.upa.ws.SecurityFunctions;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
@@ -43,6 +46,7 @@ import pt.upa.ca.ws.cli.CaClient;
 public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   
   private HashMap<String, HashMap<String, Boolean>> usedNonces = new HashMap<String, HashMap<String, Boolean>>();
+  private HashMap<String, String> sentNonces = new HashMap<String, String>();
   
   //
   // Handler interface methods
@@ -51,17 +55,15 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
     return null;
   }
 
-  public boolean handleMessage(SOAPMessageContext smc) {
+  public boolean handleMessage(SOAPMessageContext smc) throws ProtocolException {
     System.out.println("HeaderHandler: Handling message.");
 
+    //Connecting to CA
     CaClient client = null;
-    
-    
-    
     try {
       client = new CaClient ("http://localhost:9090","UpaCa");
     } catch (Exception e1) {
-      e1.printStackTrace();
+      throw new ProtocolException("Ca offline or some problem in comunication can't confirm or send messages");
     }
     
     Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
@@ -89,6 +91,14 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte nonce[] = new byte[16];
         random.nextBytes(nonce);
+        
+        //dont send the same nonce
+        while(sentNonces.containsKey(printBase64Binary(nonce))) {
+          random.nextBytes(nonce);
+        }
+        
+        //add nonce to hash of nonces sent
+        sentNonces.put(printBase64Binary(nonce), "Broker");
                
         //make digest
         byte[] digest = SecurityFunctions.digestBroker(plainText, nonce);
@@ -117,10 +127,16 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         Name nonceName = se.createName("nonce", "e", "urn:upa");
         SOAPHeaderElement nonceElement = sh.addHeaderElement(nonceName);
         nonceElement.addTextNode(textNonce);
-
         
         //get certificate from CA
         String textBrokerCertificate = client.requestCertificate("UpaBroker");
+        
+        //get BrokerPubKey from certificate
+        byte[] byteCertificate   = parseBase64Binary(textBrokerCertificate);
+        CertificateFactory cf    = CertificateFactory.getInstance("X.509");
+        Certificate certificate = cf.generateCertificate(new ByteArrayInputStream(byteCertificate));
+        Certificate caCertificate = SecurityFunctions.getCaCertificateFromKeystore("keys/UpaBroker.jks", "passwd".toCharArray());
+        certificate.verify(caCertificate.getPublicKey());
 
         Name certificateName = se.createName("certificate", "e", "urn:upa");
         SOAPHeaderElement certificateElement = sh.addHeaderElement(certificateName);
@@ -130,7 +146,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
       } else {
         System.out.println("Reading header in inbound SOAP message...");
         
-
         // get SOAP envelope header
         SOAPMessage msg = smc.getMessage();
         SOAPPart sp = msg.getSOAPPart();
@@ -149,8 +164,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
         // check header
         if (sh == null) {
-          System.out.println("Header not found.");
-          return false;
+          throw new ProtocolException("Header not found");
         }
 
         // get signature element
@@ -159,8 +173,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
         // check header element
         if (!it.hasNext()) {
-          System.out.println("Signature element not found.");
-          return false;
+          throw new ProtocolException("Signature element not found");
         }
         SOAPElement signatureElement = (SOAPElement) it.next();
 
@@ -175,8 +188,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         it = sh.getChildElements(nonceName);
 
         if (!it.hasNext()) {
-          System.out.println("Nonce element not found.");
-          return true;
+          throw new ProtocolException("Nonce element not found");
         }
         SOAPElement nonceElement = (SOAPElement) it.next();
 
@@ -191,26 +203,15 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         it = sh.getChildElements(transporterName);
 
         if (!it.hasNext()) {
-          System.out.println("Transporter name not found.");
-          return false;
+          throw new ProtocolException("No transporter name in the header");
         }
         SOAPElement transporterElement = (SOAPElement) it.next();
 
         // get header element value
         String transporterText = transporterElement.getValue();
-        /*
-        for(Entry<byte[], HashMap<String, Boolean>> entry : usedNonces.entrySet()){
-          byte[] key = entry.getKey();
-          System.out.println(Arrays.equals(key, nonce)+ " - -----");
-          HashMap<String, Boolean> value = entry.getValue();
-          System.out.println(value.containsKey(transporterText));
-        }*/
-        
-        System.out.println(usedNonces.containsKey(nonceText) + "  ------");
         
         if(usedNonces.containsKey(nonceText) && usedNonces.get(nonceText).containsKey(transporterText)){
-          System.out.println("Nonce element already used");
-          return false;
+          throw new ProtocolException("Nonce element already used");
         }
         
         if(!usedNonces.containsKey(nonceText)) {
@@ -224,22 +225,31 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         byte[] byteCertificate = parseBase64Binary(transporterCertificateText);
         CertificateFactory cf   = CertificateFactory.getInstance("X.509");
         Certificate certificate = cf.generateCertificate(new ByteArrayInputStream(byteCertificate));
-
+        
+        Certificate caCertificate = SecurityFunctions.getCaCertificateFromKeystore("keys/UpaBroker.jks", "passwd".toCharArray());
+        
+        try {
+          certificate.verify(caCertificate.getPublicKey());
+        }catch (Exception e) {throw new ProtocolException("Invalid Certificate");}
+        
         PublicKey pubKeyTransporter = certificate.getPublicKey();
         
         byte[] computedDigest = SecurityFunctions.digestTransporter(bodyText, nonce, transporterText);
 
         //Fazer o verify - should the signature be already decrypted or does the function do that?
         if(!SecurityFunctions.verifyDigitalSignature(signature, computedDigest, pubKeyTransporter)){
-          System.out.println("Wrong digital signature.");
-          return false;
+          throw new ProtocolException("Wrong signature");
         }
-
       }
     } catch (Exception e) {
       System.out.print("Caught exception in handleMessage: ");
       System.out.println(e);
       e.printStackTrace();
+      if(e instanceof ProtocolException){
+        ProtocolException el = new ProtocolException();
+        el.initCause(e.getCause());
+        throw el;
+      }
       return false;
     }
 
@@ -247,8 +257,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   }
 
   public boolean handleFault(SOAPMessageContext smc) {
-    System.out.println("Ignoring fault message...");
-    return true;
+    return false;
   }
 
   public void close(MessageContext messageContext) {

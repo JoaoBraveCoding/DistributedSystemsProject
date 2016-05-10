@@ -119,6 +119,12 @@ public class SecurityFunctions {
 
     return key;
   }
+  
+  public static Certificate getCaCertificateFromKeystore(String keyStoreFilePath, char[] keyStorePassword) throws Exception {
+    KeyStore keystore = readKeystoreFile(keyStoreFilePath, keyStorePassword);
+    Certificate cer = keystore.getCertificate("UpaCa");
+    return cer;
+  }
 
   /**
    * Reads a KeyStore from a file
