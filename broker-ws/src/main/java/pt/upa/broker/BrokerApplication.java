@@ -22,6 +22,15 @@ public class BrokerApplication {
     String name    = args[1];
     String url     = args[2];
     //String ca   = args[3];
+    String number = args[4];
+    
+    boolean primaryBroker = false;
+    if(number.equals("1")){
+      System.out.println("I'm a primary broker");
+      primaryBroker = true;
+    } else {
+      System.out.println("I'm a secondary broker");
+    }
     
     Endpoint endpoint = null;
     UDDINaming uddiNaming = null;
@@ -32,6 +41,7 @@ public class BrokerApplication {
       //publish endpoint
       System.out.printf("Starting %s%n", url);
       endpoint.publish(url);
+      
       
       //publish to UDDI
       System.out.printf("publishing '%s' to UDDI at %s%n", name, uddiURL);

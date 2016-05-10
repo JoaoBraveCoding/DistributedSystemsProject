@@ -147,6 +147,7 @@
                         <argument>${ws.name}</argument>
                         <argument>${ws.url}</argument> 
                         <argument>${ca.name}</argument>
+                        <argument>${ws.i}</argument>
                     </arguments>
                 </configuration>
             </plugin>

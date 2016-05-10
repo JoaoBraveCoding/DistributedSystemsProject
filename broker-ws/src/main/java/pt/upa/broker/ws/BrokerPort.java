@@ -2,6 +2,9 @@ package pt.upa.broker.ws;
 
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,12 +36,12 @@ public class BrokerPort implements BrokerPortType {
 
   private List<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
   private List<TransportView>    	transports   = new ArrayList<TransportView>();
-  // private Map<TransportView, JobView> transports_jobs = new HashMap<TransportView, JobView>();
-  // private Map<TransportView, TransporterPortType> transports_transporters = new HashMap<TransportView, TransporterPortType>();
   private Map<String, String> places = new HashMap<String, String>();
   private int identifierCounter = 0;
+  Timer timer = new Timer();
+  boolean primaryBroker;
 
-  public BrokerPort() {
+  public BrokerPort(boolean primBroker) {
     super();
     // adding known places 
     places.put("Porto", "North");
@@ -61,9 +64,21 @@ public class BrokerPort implements BrokerPortType {
     places.put("Portalegre", "South");
     places.put("Beja", "South");
     places.put("Faro", "South");
-
+    primaryBroker = primBroker;
+    
+    if(primaryBroker){
+      MyTimerTask sendLifeProof = new MyTimerTask();
+      timer.schedule(sendLifeProof, 2000, 2000);
+    }
   }
+  
+  public class MyTimerTask extends TimerTask {
 
+    @Override
+    public void run(){
+      imAlive("Still here baby..shh it's fine");
+    }
+  }
 
   @Override
   public String ping(String name) {
@@ -288,6 +303,29 @@ public class BrokerPort implements BrokerPortType {
     requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
 
     transporters.add(port);
+  }
+  
+  @Override
+  public void updateBackup(TransportView tv){
+    try{
+      TransportView tmp = viewTransport(tv.getId());
+      copyTransportView(tmp, tv);
+    } catch (UnknownTransportFault_Exception e){
+      transports.add(tv);
+    }
+  }
+  
+  @Override
+  public void imAlive(String foo){
+    
+  }
+  
+  private void copyTransportView(TransportView old, TransportView young){
+    old.setOrigin(young.getOrigin());
+    old.setDestination(young.getDestination());
+    old.setPrice(young.getPrice());
+    old.setTransporterCompany(young.getTransporterCompany());
+    old.setState(young.getState());
   }
 
 }
