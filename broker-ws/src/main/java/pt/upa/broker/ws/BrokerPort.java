@@ -373,7 +373,10 @@ public class BrokerPort implements BrokerPortType {
       // takeovertimer.schedule(primBrokerDied, 3000);
     }
   }
-
-
+  
+  public void stopTimers(){
+    timer.cancel();
+    takeovertimer.cancel();
+  }
 
 }

@@ -83,6 +83,7 @@ public class BrokerApplication {
       try {
         if (endpoint != null) {
           //stop endpoint
+          broker.stopTimers();
           endpoint.stop();
           System.out.printf("Stopped %s%n", url);
         }
