@@ -47,8 +47,8 @@ mkdir Project
 
 ```
 git clone  https://github.com/tecnico-distsys/A_44-project.git
+git checkout tags/SD_R2
 ```
-*(colocar aqui comandos git para obter a versão entregue a partir da tag e depois apagar esta linha)*
 
 
 [4] Instalar módulos de bibliotecas auxiliares
@@ -56,6 +56,19 @@ git clone  https://github.com/tecnico-distsys/A_44-project.git
 ```
 cd uddi-naming
 mvn clean install
+No directório do projecto:
+cd ws-handlers-aux
+mvn clean install
+cd ws-ca
+mvn install exec:java (deixar a correr num terminal a parte)
+cd ws-ca-cli
+mvn install
+cd ws-handlers
+mvn install  (caso tenha removido as keys das respectivas pastas os testes vão falhar)
+cd transporter-ws-cli
+mvn install (caso a transporter-ws esteja configurada para usar handlers deverá adicionar a flag 
+             -DskipTests caso contrário precisa de remover a pasta jaxws do src)
+
 ```
 
 -------------------------------------------------------------------------------
@@ -71,11 +84,17 @@ mvn exec:java
 ```
 
 [2] Construir **cliente** e executar testes
-These tests require two transporters to be running at the same time  
+These tests require two transporters to be running at the same time and the server *MUST* not user security handlers
+if you want to run this tests you must remove/move the folder jaxws in src/ and remove the anotation "@HandlerChain" from
+the file TransporterPort.java in transporter-ws
 
 ```
+No Handlers:
 cd transporter-ws-cli
 mvn clean install
+With Handlers:
+cd transporter-ws-cli
+mvn clean install -DskipTests
 ```
 
 
