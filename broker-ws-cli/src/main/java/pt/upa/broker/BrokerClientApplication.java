@@ -3,6 +3,7 @@ package pt.upa.broker;
 import java.util.Scanner;
 
 import pt.upa.broker.ws.cli.BrokerClient;
+import pt.upa.broker.ws.TransportView;
 
 public class BrokerClientApplication {
 
@@ -22,6 +23,7 @@ public class BrokerClientApplication {
     Scanner sc = new Scanner(System.in);
     String input = "";
     String result = "";
+    String id = "";
     while(true){
       input = sc.nextLine();
       if(input.equals("quit")){
@@ -31,8 +33,19 @@ public class BrokerClientApplication {
         result = client.ping("Client");
         System.out.println(result);
       } else if(input.equals("request")){
-        result = client.requestTransport("Coimbra","Lisboa", 49);
+        id = client.requestTransport("Coimbra","Lisboa", 49);
         System.out.println(result);
+      } else if(input.equals("view")){
+        if(id.equals("")){
+          System.out.println("You must first steal a boat, mate!");
+        } else {
+          System.out.println("Viewing tranport: "+id);
+          TransportView tv = client.viewTransport(id);
+          System.out.println(tv.getOrigin());
+          System.out.println(tv.getDestination());
+          System.out.println(tv.getPrice());
+          System.out.println(tv.getState().toString());
+        }
       }
       // while(sc.hasNextLine()) System.out.println(sc.nextLine());
     }

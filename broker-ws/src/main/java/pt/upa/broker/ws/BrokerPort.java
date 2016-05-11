@@ -4,8 +4,9 @@ import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
 import java.util.Timer;
 import java.util.TimerTask;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,8 @@ public class BrokerPort implements BrokerPortType {
     @Override
     public void run(){
       if(secondaryBroker!=null){
-        secondaryBroker.imAlive("El Capitan is still alive. I shall wait for my turn.");
+        String date = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date());
+        secondaryBroker.imAlive("["+date+"]"+" El Capitan is still alive. I shall wait for my turn.");
       }
     }
   }
@@ -94,10 +96,10 @@ public class BrokerPort implements BrokerPortType {
   public String ping(String name) {
     String returnValue;
     int counter = 0;
-    System.out.println("Received ping from " + name);
+    System.out.println("\nReceived ping from " + name);
 
     //Pinging transporters 
-    System.out.println("Pingging transporters");
+    System.out.println("Slapping transporters");
     for(TransporterPortType port : transporters){
       
       returnValue = port.ping("Broker");
@@ -105,7 +107,7 @@ public class BrokerPort implements BrokerPortType {
         counter++;
       }
     }
-    System.out.println("Pong " + name + "! " + "(" + counter + "/" + transporters.size() + ")" + " transporters online/transporters");
+    System.out.println("Slap " + name + "! " + "(" + counter + "/" + transporters.size() + ")" + " transporters online/transporters");
     return "Pong " + name + "!";
   }
 
@@ -113,6 +115,7 @@ public class BrokerPort implements BrokerPortType {
   public String requestTransport(String origin, String destination, int price) throws 
   UnknownLocationFault_Exception, InvalidPriceFault_Exception, UnavailableTransportFault_Exception, 
   UnavailableTransportPriceFault_Exception {
+    System.out.println("\nStealing pirate boat to go from... "+origin+" to "+destination+". Bounty:"+price);
 
     JobView bestJob = null;
     TransporterPortType bestTransporter = null;
