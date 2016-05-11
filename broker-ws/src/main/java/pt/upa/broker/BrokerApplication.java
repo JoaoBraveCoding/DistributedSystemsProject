@@ -1,6 +1,9 @@
 package pt.upa.broker;
 
 import java.util.Collection;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import javax.xml.ws.Endpoint;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
@@ -9,6 +12,35 @@ import pt.upa.broker.ws.BrokerPort;
 
 public class BrokerApplication {
   private static BrokerPort broker;
+  private static Timer checkBrokerPrimary = null;
+  private static boolean didntTakePlace = true;
+  
+  public static class MyTimerTask extends TimerTask {
+
+    private String name;
+    private String url;
+    private UDDINaming uddiNaming;
+    
+    public MyTimerTask(UDDINaming uddiNaming, String name, String url, BrokerPort broker){
+      this.name = name;
+      this.url = url;
+      this.uddiNaming = uddiNaming;
+    }
+    @Override
+    public void run(){
+      try{
+        if(checkBrokerPrimary!=null && broker.isPrimary() && didntTakePlace){
+          uddiNaming.rebind(name.substring(0, name.length()-1), url);
+          System.out.printf("publishing '%s' to UDDI at %s%n", name, url);
+          didntTakePlace = false;
+        }
+        if(didntTakePlace){
+          checkBrokerPrimary.schedule(new BrokerApplication.MyTimerTask(uddiNaming,  name, url, broker), 2500);
+        }
+      } catch(Exception e) {}
+    }
+  }
+  
   public static void main(String[] args) throws Exception {
     //Check arguments
     if (args.length < 3) {
@@ -30,6 +62,7 @@ public class BrokerApplication {
       primaryBroker = true;
     } else {
       System.out.println("I'm a secondary broker");
+      checkBrokerPrimary = new Timer();
     }
 
     Endpoint endpoint = null;
@@ -68,11 +101,15 @@ public class BrokerApplication {
         String secondaryBrokerAddress = uddiNaming.lookup("UpaBroker2");
         broker.addSecondaryBroker(secondaryBrokerAddress);
       }
-      if(primaryBroker) { // TODO remove 1 from broker
+      if(primaryBroker) {
         uddiNaming.rebind(name.substring(0, name.length()-1), url);
       }
       else {
         uddiNaming.rebind(name, url);
+      }
+      
+      if(checkBrokerPrimary!=null){
+        checkBrokerPrimary.schedule(new BrokerApplication.MyTimerTask(uddiNaming,  name, url, broker), 2500);
       }
       
       //wait
@@ -89,6 +126,9 @@ public class BrokerApplication {
         if (endpoint != null) {
           //stop endpoint
           broker.stopTimers();
+          if(checkBrokerPrimary!=null){
+            checkBrokerPrimary.cancel();
+          }
           endpoint.stop();
           System.out.printf("Stopped %s%n", url);
         }

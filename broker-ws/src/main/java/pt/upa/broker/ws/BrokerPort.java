@@ -86,6 +86,7 @@ public class BrokerPort implements BrokerPortType {
     public void run(){
       //takeover
       System.out.println("MY TURN!!! MUAHAHAHAHAHAHAH!!");
+      primaryBroker = true;
     }
   }
 
@@ -385,6 +386,10 @@ public class BrokerPort implements BrokerPortType {
   public void stopTimers(){
     timer.cancel();
     takeovertimer.cancel();
+  }
+
+  public boolean isPrimary() {
+    return primaryBroker;
   }
 
 }
