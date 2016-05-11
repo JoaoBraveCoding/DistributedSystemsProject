@@ -87,7 +87,7 @@ public class BrokerPort implements BrokerPortType {
     @Override
     public void run(){
       //takeover
-      System.out.println("MY TURN!!! MUAHAHAHAHAHAHAH!!");
+      System.out.println("\nI BE THE CAPTAIN NOW!! YARRRR");
       primaryBroker = true;
     }
   }
@@ -99,7 +99,7 @@ public class BrokerPort implements BrokerPortType {
     System.out.println("\nReceived ping from " + name);
 
     //Pinging transporters 
-    System.out.println("Slapping transporters");
+    System.out.println("Ping - Slapping transporters");
     for(TransporterPortType port : transporters){
       
       returnValue = port.ping("Broker");
@@ -115,7 +115,7 @@ public class BrokerPort implements BrokerPortType {
   public String requestTransport(String origin, String destination, int price) throws 
   UnknownLocationFault_Exception, InvalidPriceFault_Exception, UnavailableTransportFault_Exception, 
   UnavailableTransportPriceFault_Exception {
-    System.out.println("\nStealing pirate boat to go from... "+origin+" to "+destination+". Bounty:"+price);
+    System.out.println("\nLooking for pirate ship to go from... "+origin+" to "+destination+". Bounty:"+price);
 
     JobView bestJob = null;
     TransporterPortType bestTransporter = null;
@@ -296,7 +296,6 @@ public class BrokerPort implements BrokerPortType {
 
   @Override
   public List<TransportView> listTransports() {
-
     return transports;
   }
 

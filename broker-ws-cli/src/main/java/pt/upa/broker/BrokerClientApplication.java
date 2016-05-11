@@ -4,6 +4,8 @@ import java.util.Scanner;
 
 import pt.upa.broker.ws.cli.BrokerClient;
 import pt.upa.broker.ws.TransportView;
+import pt.upa.broker.ws.UnavailableTransportFault;
+import pt.upa.broker.ws.UnavailableTransportFault_Exception;
 
 public class BrokerClientApplication {
 
@@ -32,14 +34,29 @@ public class BrokerClientApplication {
       if(input.equals("ping")){
         result = client.ping("Client");
         System.out.println(result);
-      } else if(input.equals("request")){
-        id = client.requestTransport("Coimbra","Lisboa", 49);
-        System.out.println(result);
+      } else if(input.equals("list")){
+        System.out.println("\nSize of list: " + client.listTransports().size());
+      } else if(input.equals("clear")){
+        client.clearTransports();
+      } else if(input.equals("request1")){
+        int randomPrice = (int) (Math.random() * ( 100 - 10 ));
+        System.out.println("\nRequesting pirate trip from Coimbra to Lisboa. Bounty be: " + randomPrice);
+        id = client.requestTransport("Coimbra","Lisboa", randomPrice);
+        System.out.println("Request result: Transport id -" + id);
+      } else if(input.equals("request2")){
+        int randomPrice = (int) (Math.random() * ( 100 - 10 ));
+        try{
+          System.out.println("\nRequesting pirate trip from Porto to Beja. Bounty be: " + randomPrice);
+          id = client.requestTransport("Porto","Beja", randomPrice);
+          System.out.println("Request result: Transport id -" + id);
+        } catch (UnavailableTransportFault_Exception e){
+          System.out.println("\nCannot do that kind of trip..\nException: " + e.getMessage());
+        }
       } else if(input.equals("view")){
         if(id.equals("")){
-          System.out.println("You must first steal a boat, mate!");
+          System.out.println("\nYou must first steal a ship, mate!");
         } else {
-          System.out.println("Viewing tranport: "+id);
+          System.out.println("\nViewing tranport: "+id);
           TransportView tv = client.viewTransport(id);
           System.out.println(tv.getOrigin());
           System.out.println(tv.getDestination());

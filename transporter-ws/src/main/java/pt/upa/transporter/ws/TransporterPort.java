@@ -121,7 +121,7 @@ public class TransporterPort implements TransporterPortType {
 	@Override
 	public String ping(String name) {
 	  putTransporterNameInContext();
-		System.out.println("Received Ping from " + name);
+		System.out.println("Ping - " + name + "slapped me... ouch");
 		return "Pong " + name + "!";
 	}
 	
@@ -129,10 +129,9 @@ public class TransporterPort implements TransporterPortType {
 	public JobView requestJob(String origin, String destination, int price)
 			throws BadLocationFault_Exception, BadPriceFault_Exception {
 	  putTransporterNameInContext();
-	  System.out.println(origin + " destination: " + destination + " price: " + price);
+	  System.out.println("\nTrip from " + origin + " to " + destination + " proposed. Bounty: " + price);
 	  
 		JobView budgetJob;
-		System.out.println(price);
 		//check Price
 		if(price < 0){
 			BadPriceFault badPrice = new BadPriceFault();
@@ -157,7 +156,7 @@ public class TransporterPort implements TransporterPortType {
 		//doesn't operate in region 
 		if (placesNotOperable.containsKey(origin) || placesNotOperable.containsKey(destination)) {
 		  
-		  System.out.println("I do not work in this conditions.");
+		  System.out.println("No ship can do that trip!! yarrr!");
 			return null;
 		}
 
