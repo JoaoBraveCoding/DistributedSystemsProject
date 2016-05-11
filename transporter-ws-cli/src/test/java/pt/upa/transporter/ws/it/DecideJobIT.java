@@ -2,7 +2,6 @@ package pt.upa.transporter.ws.it;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 

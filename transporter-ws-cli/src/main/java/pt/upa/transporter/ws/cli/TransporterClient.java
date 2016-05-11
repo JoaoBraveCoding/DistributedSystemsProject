@@ -5,7 +5,6 @@ import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 import java.util.List;
 import java.util.Map;
 
-import javax.jws.HandlerChain;
 import javax.xml.registry.JAXRException;
 import javax.xml.ws.BindingProvider;
 

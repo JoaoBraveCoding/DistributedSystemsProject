@@ -1,15 +1,12 @@
 package pt.upa.ca.ws;
 
-import java.io.ByteArrayInputStream;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 
 import javax.jws.WebService;
 
 import pt.upa.ca.exception.NullValueReceivedException;
 import pt.upa.ws.SecurityFunctions;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
-import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 
 @WebService(

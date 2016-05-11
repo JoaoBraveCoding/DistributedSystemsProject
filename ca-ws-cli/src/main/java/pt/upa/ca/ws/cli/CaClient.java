@@ -3,7 +3,6 @@ package pt.upa.ca.ws.cli;
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
 import java.net.UnknownServiceException;
-import java.security.cert.Certificate;
 import java.util.Map;
 
 import javax.xml.registry.JAXRException;
