@@ -121,7 +121,7 @@ public class TransporterPort implements TransporterPortType {
 	@Override
 	public String ping(String name) {
 	  putTransporterNameInContext();
-		System.out.println("Ping - " + name + "slapped me... ouch");
+		System.out.println("Ping - " + name + " slapped me... ouch");
 		return "Pong " + name + "!";
 	}
 	

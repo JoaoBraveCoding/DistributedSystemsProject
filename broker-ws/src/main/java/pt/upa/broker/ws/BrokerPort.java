@@ -301,6 +301,9 @@ public class BrokerPort implements BrokerPortType {
 
   @Override
   public void clearTransports() {
+    if(secondaryBroker!=null){
+      secondaryBroker.clearTransports(); 
+    }
     identifierCounter = 0;
     for(TransporterPortType transporter: transporters){
       transporter.clearJobs();
@@ -343,6 +346,7 @@ public class BrokerPort implements BrokerPortType {
     secondaryBroker = port;
   }
   
+  /*
   @Override
   public void updateBackup(TransportView tv){
     System.out.println("updating transport with id: "+tv.getId());
@@ -352,6 +356,24 @@ public class BrokerPort implements BrokerPortType {
         copyTransportView(tmp, tv);
       } catch (UnknownTransportFault_Exception e){
         transports.add(tv);
+      }
+    }
+  }*/
+  
+  @Override
+  public void updateBackup(TransportView tv){
+    System.out.println("updating transport with id: "+tv.getId());
+    if(!primaryBroker){
+      try{
+        TransportView tmp = viewTransport(tv.getId());
+        copyTransportView(tmp, tv);
+      } catch (UnknownTransportFault_Exception e){
+        try{
+          TransportView tmp = viewTransport(tv.getId().split("_")[0]);
+          copyTransportView(tmp, tv);
+        } catch(UnknownTransportFault_Exception e2){
+          transports.add(tv);
+        }
       }
     }
   }
