@@ -84,9 +84,9 @@ mvn exec:java
 ```
 
 [2] Construir **cliente** e executar testes
-These tests require two transporters to be running at the same time and the server *MUST* not user security handlers
-if you want to run this tests you must remove/move the folder jaxws in src/ and remove the anotation "@HandlerChain" from
-the file TransporterPort.java in transporter-ws
+These tests require two transporters to be running at the same time and the server **MUST** not user security handlers
+if you want to run this tests you **MUST remove/move the folder jaxws in src/** and **remove the anotation "@HandlerChain"**
+**from the file TransporterPort.java in transporter-ws**
 
 ```
 No Handlers:
