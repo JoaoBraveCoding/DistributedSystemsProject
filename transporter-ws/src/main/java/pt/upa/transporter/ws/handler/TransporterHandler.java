@@ -29,7 +29,7 @@ import pt.upa.ws.SecurityFunctions;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
-public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
+public class TransporterHandler implements SOAPHandler<SOAPMessageContext> {
 
   public static final String CONTEXT_PROPERTY = "transporterName";
   
@@ -45,8 +45,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   public boolean handleMessage(SOAPMessageContext smc) {
     System.out.println("HeaderHandler: Handling message.");
     
-    System.out.println("GGGoing to   " + usedNonces.size());
-
     Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
     try {

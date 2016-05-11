@@ -1,4 +1,4 @@
-package pt.upa.broker.ws.handler;
+package pt.upa.ws.handler;
 
 import java.io.ByteArrayInputStream;
 

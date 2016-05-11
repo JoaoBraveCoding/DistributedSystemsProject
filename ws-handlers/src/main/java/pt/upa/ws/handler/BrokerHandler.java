@@ -1,4 +1,4 @@
-package pt.upa.broker.ws.handler;
+package pt.upa.ws.handler;
 
 import java.io.ByteArrayInputStream;
 import java.security.PrivateKey;
@@ -26,13 +26,13 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import javax.xml.ws.ProtocolException;
 
-import pt.upa.ws.SecurityFunctions;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 import pt.upa.ca.ws.cli.CaClient;
+import pt.upa.ws.SecurityFunctions;
 
-public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
+public class BrokerHandler implements SOAPHandler<SOAPMessageContext> {
   
   private HashMap<String, HashSet<String>> usedNonces = new HashMap<String, HashSet<String>>();
   private HashMap<String, String> sentNonces = new HashMap<String, String>();
@@ -93,7 +93,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         byte[] digest = SecurityFunctions.digestBroker(plainText, nonce);
 
         //encrypt digest = signature
-        PrivateKey privKey = SecurityFunctions.getPrivateKeyFromKeystore("keys/UpaBroker.jks", "passwd".toCharArray(), "UpaBroker", "passwd".toCharArray()); 
+        PrivateKey privKey = SecurityFunctions.getPrivateKeyFromKeystore("../broker-ws/keys/UpaBroker.jks", "passwd".toCharArray(), "UpaBroker", "passwd".toCharArray()); 
         
         byte[] signature = SecurityFunctions.makeDigitalSignature(digest, privKey);
         
@@ -124,7 +124,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         byte[] byteCertificate   = parseBase64Binary(textBrokerCertificate);
         CertificateFactory cf    = CertificateFactory.getInstance("X.509");
         Certificate certificate = cf.generateCertificate(new ByteArrayInputStream(byteCertificate));
-        Certificate caCertificate = SecurityFunctions.getCaCertificateFromKeystore("keys/UpaBroker.jks", "passwd".toCharArray());
+        Certificate caCertificate = SecurityFunctions.getCaCertificateFromKeystore("../broker-ws/keys/UpaBroker.jks", "passwd".toCharArray());
         certificate.verify(caCertificate.getPublicKey());
 
         Name certificateName = se.createName("certificate", "e", "urn:upa");
@@ -215,7 +215,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         CertificateFactory cf   = CertificateFactory.getInstance("X.509");
         Certificate certificate = cf.generateCertificate(new ByteArrayInputStream(byteCertificate));
         
-        Certificate caCertificate = SecurityFunctions.getCaCertificateFromKeystore("keys/UpaBroker.jks", "passwd".toCharArray());
+        Certificate caCertificate = SecurityFunctions.getCaCertificateFromKeystore("../broker-ws/keys/UpaBroker.jks", "passwd".toCharArray());
         
         try {
           certificate.verify(caCertificate.getPublicKey());

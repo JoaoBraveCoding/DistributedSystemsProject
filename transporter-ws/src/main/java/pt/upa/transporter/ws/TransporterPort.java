@@ -14,7 +14,7 @@ import javax.jws.WebService;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
-import pt.upa.transporter.ws.handler.HeaderHandler;
+import pt.upa.transporter.ws.handler.TransporterHandler;
 
 @WebService(
 		endpointInterface="pt.upa.transporter.ws.TransporterPortType",
@@ -297,13 +297,13 @@ public class TransporterPort implements TransporterPortType {
       MessageContext messageContext = webServiceContext.getMessageContext();
       // *** #6 ***
       // get token from message context
-      String propertyValue = (String) messageContext.get(HeaderHandler.CONTEXT_PROPERTY);
+      String propertyValue = (String) messageContext.get(TransporterHandler.CONTEXT_PROPERTY);
       System.out.printf("%s got token '%s' from response context%n", "transporter", propertyValue);
   
       // *** #7 ***
       // put token in message context
       System.out.printf("%s put token '%s' on request context%n", "transporter", this.name);
-      messageContext.put(HeaderHandler.CONTEXT_PROPERTY, this.name);
+      messageContext.put(TransporterHandler.CONTEXT_PROPERTY, this.name);
     }
 	}
 

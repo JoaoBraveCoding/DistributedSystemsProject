@@ -1,4 +1,4 @@
-package pt.upa.broker.ws.handler;
+package pt.upa.ws.handler;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -31,7 +31,7 @@ import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 /**
  *  Handler test suite
  */
-public class HeaderHandlerTest extends AbstractHandlerTest {
+public class BrokerHandlerTest extends AbstractHandlerTest {
 
     // tests
 
@@ -57,7 +57,7 @@ public class HeaderHandlerTest extends AbstractHandlerTest {
         }};
 
         // Unit under test is exercised.
-        HeaderHandler handler = new HeaderHandler();
+        BrokerHandler handler = new BrokerHandler();
         boolean handleResult = handler.handleMessage(soapMessageContext);
 
         // Additional verification code, if any, either here or before the verification block.
@@ -134,7 +134,7 @@ public class HeaderHandlerTest extends AbstractHandlerTest {
       }};
 
       // Unit under test is exercised.
-      HeaderHandler handler = new HeaderHandler();
+      BrokerHandler handler = new BrokerHandler();
       boolean handleResult = handler.handleMessage(soapMessageContext);
 
       // assert that message would proceed normally
@@ -165,7 +165,7 @@ public class HeaderHandlerTest extends AbstractHandlerTest {
       }};
 
       // Unit under test is exercised.
-      HeaderHandler handler = new HeaderHandler();
+      BrokerHandler handler = new BrokerHandler();
       boolean handleResult = handler.handleMessage(soapMessageContext);
 
       //soapMessage.writeTo(System.out);
