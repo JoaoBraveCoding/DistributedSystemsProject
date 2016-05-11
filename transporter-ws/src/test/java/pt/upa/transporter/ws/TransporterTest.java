@@ -99,7 +99,7 @@ public class TransporterTest extends AbstractTransporterTest{
   public void underpriced_job_request() throws BadLocationFault_Exception,
   BadPriceFault_Exception{
     JobView jv3 = transporter.requestJob("Beja",  "Faro",  5);
-    assertTrue(jv3.getJobPrice() < 5 && jv3.getJobPrice() >= 0);
+    assertTrue(jv3.getJobPrice() < 5 && jv3.getJobPrice() > 0);
   }
   
   @Test
@@ -181,7 +181,7 @@ public class TransporterTest extends AbstractTransporterTest{
   BadLocationFault_Exception, BadPriceFault_Exception{
     transporter.requestJob("Beja", "Faro", 50);
     transporter.decideJob("UpaTransporter1.0", true);
-    TimeUnit.SECONDS.sleep(12);
+    TimeUnit.SECONDS.sleep(16);
     assertTrue(transporter.listJobs().get(0).getJobState() == JobStateView.COMPLETED);
   }
   

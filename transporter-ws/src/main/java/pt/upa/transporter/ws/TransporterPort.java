@@ -163,7 +163,7 @@ public class TransporterPort implements TransporterPortType {
 		budgetJob = createNewJob(origin, destination);
 
 		if(price <= 10) {
-			budgetJob.setJobPrice(rn.nextInt(price) + 1);
+			budgetJob.setJobPrice(rn.nextInt(price-1) + 1);
 			jobs.add(budgetJob);
 			System.out.println("Proposing: "+ budgetJob.getJobPrice());
 			return budgetJob;

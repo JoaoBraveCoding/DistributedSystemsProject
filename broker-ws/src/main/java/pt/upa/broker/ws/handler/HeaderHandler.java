@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -33,7 +34,7 @@ import pt.upa.ca.ws.cli.CaClient;
 
 public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
   
-  private HashMap<String, HashMap<String, Boolean>> usedNonces = new HashMap<String, HashMap<String, Boolean>>();
+  private HashMap<String, HashSet<String>> usedNonces = new HashMap<String, HashSet<String>>();
   private HashMap<String, String> sentNonces = new HashMap<String, String>();
   
   //
@@ -198,15 +199,15 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         // get header element value
         String transporterText = transporterElement.getValue();
         
-        if(usedNonces.containsKey(nonceText) && usedNonces.get(nonceText).containsKey(transporterText)){
+        if(usedNonces.containsKey(nonceText) && usedNonces.get(nonceText).contains(transporterText)){
           throw new ProtocolException("Nonce element already used");
         }
         
         if(!usedNonces.containsKey(nonceText)) {
-          usedNonces.put(nonceText, new HashMap<String, Boolean>());
+          usedNonces.put(nonceText, new HashSet<String>());
         }
         
-        usedNonces.get(nonceText).put(transporterText, true);
+        usedNonces.get(nonceText).add(transporterText);
         
         //get certificate from CA
         String transporterCertificateText = client.requestCertificate(transporterText);

@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -32,7 +33,7 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
   public static final String CONTEXT_PROPERTY = "transporterName";
   
-  private HashMap<String, String> usedNonces = new HashMap<String, String>();
+  private Set<String> usedNonces = new HashSet<String>();
   private HashMap<String, String> noncesSent = new HashMap<String, String>();
   //
   // Handler interface methods
@@ -43,6 +44,8 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
 
   public boolean handleMessage(SOAPMessageContext smc) {
     System.out.println("HeaderHandler: Handling message.");
+    
+    System.out.println("GGGoing to   " + usedNonces.size());
 
     Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
@@ -69,7 +72,6 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte nonce[] = new byte[16];
         random.nextBytes(nonce);
-        //Arrays.fill(nonce, (byte)1);
         
         //dont send the same nonce
         while(noncesSent.containsKey(printBase64Binary(nonce))) {
@@ -168,10 +170,12 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         String nonceText = nonceElement.getValue();
 
         //check if is a new nonce
-        if(usedNonces.containsKey(nonceText)){
+        if(usedNonces.contains(nonceText)){
           System.out.println("Nonce already used once");
           return false;
         }
+        
+        usedNonces.add(nonceText);
         
         //change nonce to byte
         byte[] nonce = parseBase64Binary(nonceText);
