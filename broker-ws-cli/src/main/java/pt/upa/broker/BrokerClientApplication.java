@@ -27,6 +27,7 @@ public class BrokerClientApplication {
     String result = "";
     String id = "";
     while(true){
+      System.out.print("$");
       input = sc.nextLine();
       if(input.equals("quit")){
         break;
@@ -37,6 +38,7 @@ public class BrokerClientApplication {
       } else if(input.equals("list")){
         System.out.println("\nSize of list: " + client.listTransports().size());
       } else if(input.equals("clear")){
+        id ="";
         client.clearTransports();
       } else if(input.equals("request1")){
         int randomPrice = (int) (Math.random() * ( 100 - 10 ));

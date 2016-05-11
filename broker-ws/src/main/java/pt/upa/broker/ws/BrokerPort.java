@@ -129,9 +129,6 @@ public class BrokerPort implements BrokerPortType {
     priceIsValid(price);
 
     TransportView transport = createTransport(origin, destination);
-    if(secondaryBroker!=null){
-      secondaryBroker.updateBackup(transport);
-    }
 
     for(TransporterPortType transporter: transporters){
       JobView requested_job;
@@ -171,9 +168,6 @@ public class BrokerPort implements BrokerPortType {
     }
 
     updateTransport(transport, bestTransporter, bestJob);
-    if(secondaryBroker!=null){
-      secondaryBroker.updateBackup(transport);
-    }
     
     try {
       bestTransporter.decideJob(bestJob.getJobIdentifier(), true);
@@ -327,7 +321,7 @@ public class BrokerPort implements BrokerPortType {
     BindingProvider bindingProvider = (BindingProvider) port;
     Map<String, Object> requestContext = bindingProvider.getRequestContext();
     requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
-
+    System.out.println("\nAdding transporter: " + port.toString());
     transporters.add(port);
   }
   
@@ -345,35 +339,16 @@ public class BrokerPort implements BrokerPortType {
     
     secondaryBroker = port;
   }
-  
-  /*
+    
   @Override
   public void updateBackup(TransportView tv){
     System.out.println("updating transport with id: "+tv.getId());
     if(!primaryBroker){
       try{
-        TransportView tmp = viewTransport(tv.getId());
+        TransportView tmp = viewTransport(tv.getId().split("_")[0]);
         copyTransportView(tmp, tv);
-      } catch (UnknownTransportFault_Exception e){
+      } catch(UnknownTransportFault_Exception e2){
         transports.add(tv);
-      }
-    }
-  }*/
-  
-  @Override
-  public void updateBackup(TransportView tv){
-    System.out.println("updating transport with id: "+tv.getId());
-    if(!primaryBroker){
-      try{
-        TransportView tmp = viewTransport(tv.getId());
-        copyTransportView(tmp, tv);
-      } catch (UnknownTransportFault_Exception e){
-        try{
-          TransportView tmp = viewTransport(tv.getId().split("_")[0]);
-          copyTransportView(tmp, tv);
-        } catch(UnknownTransportFault_Exception e2){
-          transports.add(tv);
-        }
       }
     }
   }
