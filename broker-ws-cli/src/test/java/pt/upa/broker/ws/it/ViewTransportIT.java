@@ -1,8 +1,6 @@
 package pt.upa.broker.ws.it;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.concurrent.TimeUnit;
+import static org.junit.Assert.assertTrue;
 
 import javax.xml.registry.JAXRException;
 
@@ -22,9 +20,13 @@ public class ViewTransportIT extends AbstractBrokerIT {
   @Test
   public void broker_viewTransport_success() throws UnknownTransportFault_Exception, InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception, JAXRException, UnknownServiceException {
 	String id = "";
+	boolean tmp = false;
 	id = client.requestTransport("Lisboa", "Coimbra", 49);
 	TransportView transport = client.viewTransport(id);
-  assertEquals(TransportStateView.BOOKED, transport.getState());
+	if(transport.getState().equals(TransportStateView.HEADING) || transport.getState().equals(TransportStateView.BOOKED)){
+	  tmp = true;
+	}
+  assertTrue(tmp);
   
   }
 

@@ -69,7 +69,7 @@ public class BrokerApplication {
     try {
       broker = new BrokerPort();
       broker.setBrokerType(primaryBroker);
-      endpoint = Endpoint.create(broker); // TODO check if successful
+      endpoint = Endpoint.create(broker);
 
       //publish endpoint
       System.out.printf("Starting %s%n", url);
@@ -91,14 +91,16 @@ public class BrokerApplication {
       for(String s : resultUDDIList)
         broker.addTransporter(s, uddiNaming);
 
-      //Adding ca to broker
-      //String caEndpointAddress = uddiNaming.lookup(ca); 
-      //broker.addCa(caEndpointAddress);
-
       if(primaryBroker){
         System.out.println("Adding secondary broker...");
-        String secondaryBrokerAddress = uddiNaming.lookup("UpaBroker2");
-        broker.addSecondaryBroker(secondaryBrokerAddress);
+        String secondaryBrokerAddress = null; 
+        secondaryBrokerAddress = uddiNaming.lookup("UpaBroker2");
+        if(secondaryBrokerAddress != null){
+          broker.addSecondaryBroker(secondaryBrokerAddress);
+        }
+        else{
+          System.out.println("No secondary broker up. Try launching it first.");
+        }
       }
       if(primaryBroker) {
         uddiNaming.rebind(name.substring(0, name.length()-1), url);
