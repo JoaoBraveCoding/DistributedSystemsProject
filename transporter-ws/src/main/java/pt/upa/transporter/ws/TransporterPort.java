@@ -283,6 +283,7 @@ public class TransporterPort implements TransporterPortType {
 
 	@Override
 	public void clearJobs() {
+	  putTransporterNameInContext();
 		jobs = new ArrayList<JobView>();
 		identifierCounter = -1;
 	}
