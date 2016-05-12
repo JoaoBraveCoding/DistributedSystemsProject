@@ -298,12 +298,14 @@ public class TransporterPort implements TransporterPortType {
       // *** #6 ***
       // get token from message context
       String propertyValue = (String) messageContext.get(TransporterHandler.CONTEXT_PROPERTY);
-      System.out.printf("%s got token '%s' from response context%n", "transporter", propertyValue);
-  
-      // *** #7 ***
-      // put token in message context
-      System.out.printf("%s put token '%s' on request context%n", "transporter", this.name);
-      messageContext.put(TransporterHandler.CONTEXT_PROPERTY, this.name);
+      if (propertyValue != null){
+        System.out.printf("%s got token '%s' from response context%n", "transporter", propertyValue);
+    
+        // *** #7 ***
+        // put token in message context
+        System.out.printf("%s put token '%s' on request context%n", "transporter", this.name);
+        messageContext.put(TransporterHandler.CONTEXT_PROPERTY, this.name);
+      }
     }
 	}
 
