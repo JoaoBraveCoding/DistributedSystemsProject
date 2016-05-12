@@ -104,7 +104,15 @@ mvn clean install -DskipTests
 ### Serviço BROKER
 
 [1] Construir e executar **servidor**
+De modo a suportar replicação com um broker secundário é necessário:
+```
+cd broker-ws
+mvn install exec:java -Dws.i=2 (numa janela de terminal)
+cd broker-ws
+mvn exec:java
+```
 
+Ou para apenas um broker (sem replicação):
 ```
 cd broker-ws
 mvn clean install
@@ -119,6 +127,24 @@ cd broker-ws-cli
 mvn clean install
 ```
 
+
+-------------------------------------------------------------------------------
+
+### Serviço CA
+
+[1] Construir e executar **servidor**
+
+```
+cd ca-ws
+mvn clean install exec:java
+```
+
+[2] Construir **cliente** e executar testes
+
+```
+cd ca-ws-cli
+mvn clean install
+```
 
 -------------------------------------------------------------------------------
 **FIM**
