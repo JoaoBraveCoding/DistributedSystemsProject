@@ -30,7 +30,7 @@ public class CaPort implements CaPortType {
     }
     Certificate certificate = SecurityFunctions.readCertificateFile("keys/" + name + ".cer");
     String stringCertificate = printBase64Binary(certificate.getEncoded());
-    System.out.println("Certificare for " + name + " sent.");
+    System.out.println("Certificate for " + name + " sent.");
     return stringCertificate;
   }
  
