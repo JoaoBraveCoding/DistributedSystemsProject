@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.xml.registry.JAXRException;
+
 import org.junit.Test;
 
 import pt.upa.broker.ws.InvalidPriceFault_Exception;
@@ -13,11 +15,12 @@ import pt.upa.broker.ws.UnavailableTransportFault_Exception;
 import pt.upa.broker.ws.UnavailableTransportPriceFault_Exception;
 import pt.upa.broker.ws.UnknownLocationFault_Exception;
 import pt.upa.broker.ws.UnknownTransportFault_Exception;
+import pt.upa.broker.ws.exception.UnknownServiceException;
 
 public class ViewTransportIT extends AbstractBrokerIT {
  
   @Test
-  public void broker_viewTransport_success() throws UnknownTransportFault_Exception, InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
+  public void broker_viewTransport_success() throws UnknownTransportFault_Exception, InvalidPriceFault_Exception, UnavailableTransportFault_Exception, UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception, JAXRException, UnknownServiceException {
 	String id = "";
 	id = client.requestTransport("Lisboa", "Coimbra", 49);
 	TransportView transport = client.viewTransport(id);
@@ -26,7 +29,10 @@ public class ViewTransportIT extends AbstractBrokerIT {
   }
 
   protected void populate() {
-    client.clearTransports();
-    // TODO Auto-generated method stub
+    try {
+      client.clearTransports();
+    } catch (JAXRException | UnknownServiceException e) {
+      System.out.println(e.getMessage());
+    }
   }
 }

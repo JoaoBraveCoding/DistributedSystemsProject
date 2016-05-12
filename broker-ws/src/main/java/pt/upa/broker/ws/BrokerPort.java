@@ -2,7 +2,11 @@ package pt.upa.broker.ws;
 
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +39,13 @@ public class BrokerPort implements BrokerPortType {
 
   private List<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
   private List<TransportView>    	transports   = new ArrayList<TransportView>();
-  // private Map<TransportView, JobView> transports_jobs = new HashMap<TransportView, JobView>();
-  // private Map<TransportView, TransporterPortType> transports_transporters = new HashMap<TransportView, TransporterPortType>();
   private Map<String, String> places = new HashMap<String, String>();
+  private BrokerPortType secondaryBroker = null;
   private int identifierCounter = 0;
+  Timer timer = new Timer();
+  Timer takeovertimer = new Timer();
+  MyTakeoverTimer primBrokerDied;
+  boolean primaryBroker = false;
 
   public BrokerPort() {
     super();
@@ -63,18 +70,38 @@ public class BrokerPort implements BrokerPortType {
     places.put("Portalegre", "South");
     places.put("Beja", "South");
     places.put("Faro", "South");
-
+    
   }
+  
+  public class MyTimerTask extends TimerTask {
 
+    @Override
+    public void run(){
+      if(secondaryBroker!=null){
+        String date = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date());
+        secondaryBroker.imAlive("["+date+"]"+" El Capitan is still alive. I shall wait for my turn.");
+      }
+    }
+  }
+  
+  public class MyTakeoverTimer extends TimerTask {
+
+    @Override
+    public void run(){
+      //takeover
+      System.out.println("\nI BE THE CAPTAIN NOW!! YARRRR");
+      primaryBroker = true;
+    }
+  }
 
   @Override
   public String ping(String name) {
     String returnValue;
     int counter = 0;
-    System.out.println("Received ping from " + name);
+    System.out.println("\nReceived ping from " + name);
 
     //Pinging transporters 
-    System.out.println("Pingging transporters");
+    System.out.println("Ping - Slapping transporters");
     for(TransporterPortType port : transporters){
       
       returnValue = port.ping("Broker");
@@ -82,7 +109,7 @@ public class BrokerPort implements BrokerPortType {
         counter++;
       }
     }
-    System.out.println("Pong " + name + "! " + "(" + counter + "/" + transporters.size() + ")" + " transporters online/transporters");
+    System.out.println("Slap " + name + "! " + "(" + counter + "/" + transporters.size() + ")" + " transporters online/transporters");
     return "Pong " + name + "!";
   }
 
@@ -90,6 +117,7 @@ public class BrokerPort implements BrokerPortType {
   public String requestTransport(String origin, String destination, int price) throws 
   UnknownLocationFault_Exception, InvalidPriceFault_Exception, UnavailableTransportFault_Exception, 
   UnavailableTransportPriceFault_Exception {
+    System.out.println("\nLooking for pirate ship to go from... "+origin+" to "+destination+". Bounty:"+price);
 
     JobView bestJob = null;
     TransporterPortType bestTransporter = null;
@@ -132,16 +160,23 @@ public class BrokerPort implements BrokerPortType {
 
     if(bestJob==null && !one_job_not_null){
       transport.setState(TransportStateView.FAILED);
+      if(secondaryBroker!=null){
+        secondaryBroker.updateBackup(transport);
+      }
       UnavailableTransportFault fault = new UnavailableTransportFault();
       throw new UnavailableTransportFault_Exception("No transporter for the job", fault);
     }
     else if(bestJob==null && one_job_not_null){
       transport.setState(TransportStateView.FAILED);
+      if(secondaryBroker!=null){
+        secondaryBroker.updateBackup(transport);
+      }
       UnavailableTransportPriceFault fault = new UnavailableTransportPriceFault();
       throw new UnavailableTransportPriceFault_Exception("Unavailable price", fault);
     }
 
     updateTransport(transport, bestTransporter, bestJob);
+    
     try {
       bestTransporter.decideJob(bestJob.getJobIdentifier(), true);
     } catch (BadJobFault_Exception e) {
@@ -157,6 +192,10 @@ public class BrokerPort implements BrokerPortType {
           System.out.println(e.getMessage());
         }
       }
+    }
+    
+    if(secondaryBroker!=null){
+      secondaryBroker.updateBackup(transport);
     }
     return transport.getId();
   }
@@ -259,12 +298,14 @@ public class BrokerPort implements BrokerPortType {
 
   @Override
   public List<TransportView> listTransports() {
-
     return transports;
   }
 
   @Override
   public void clearTransports() {
+    if(secondaryBroker!=null){
+      secondaryBroker.clearTransports(); 
+    }
     identifierCounter = 0;
     for(TransporterPortType transporter: transporters){
       transporter.clearJobs();
@@ -288,8 +329,75 @@ public class BrokerPort implements BrokerPortType {
     BindingProvider bindingProvider = (BindingProvider) port;
     Map<String, Object> requestContext = bindingProvider.getRequestContext();
     requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
-
+    System.out.println("\nAdding transporter: " + port.toString());
     transporters.add(port);
+  }
+  
+  public void addSecondaryBroker(String secondaryBrokerAddress) {
+    if (secondaryBrokerAddress == null) {
+      System.out.println("Not found!");
+      return;
+    }
+    BrokerService service = new BrokerService();
+    BrokerPortType port = service.getBrokerPort();
+
+    BindingProvider bindingProvider = (BindingProvider) port;
+    Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, secondaryBrokerAddress);
+    
+    secondaryBroker = port;
+  }
+
+  @Override
+  public void updateBackup(TransportView tv){
+    System.out.println("updating transport with id: "+tv.getId());
+    if(!primaryBroker){
+      for(TransportView tmp: transports){
+        if(tmp.getId().equals(tv.getId())){
+          copyTransportView(tmp,tv);
+          return;
+        }
+      }
+      transports.add(tv);
+    }
+  }
+  
+  @Override
+  public void imAlive(String arg){
+    System.out.println(arg);
+    if(!primaryBroker){
+      //reset timer to take over
+      if(primBrokerDied!=null){
+        primBrokerDied.cancel();
+      }
+      primBrokerDied = new MyTakeoverTimer();
+      takeovertimer.schedule(primBrokerDied, 2000);
+    }
+  }
+  
+  private void copyTransportView(TransportView old, TransportView young){
+    old.setOrigin(young.getOrigin());
+    old.setDestination(young.getDestination());
+    old.setPrice(young.getPrice());
+    old.setTransporterCompany(young.getTransporterCompany());
+    old.setState(young.getState());
+  }
+
+  public void setBrokerType(boolean primary) {
+    primaryBroker = primary;
+    if(primaryBroker){
+      MyTimerTask sendLifeProof = new MyTimerTask();
+      timer.schedule(sendLifeProof, 1000, 1000);
+    }
+  }
+  
+  public void stopTimers(){
+    timer.cancel();
+    takeovertimer.cancel();
+  }
+
+  public boolean isPrimary() {
+    return primaryBroker;
   }
 
 }

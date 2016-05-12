@@ -20,14 +20,17 @@
 
         <wsdl.directory>src/main/resources</wsdl.directory>
         <wsdl.filename>broker.1_0.wsdl</wsdl.filename>
-        
 
         <mainclass>pt.upa.broker.BrokerApplication</mainclass>
+        
+        <ws.i>1</ws.i>        
+        <ws.host>localhost</ws.host>
+        <ws.port>807${ws.i}</ws.port>
+        <ws.url>http://${ws.host}:${ws.port}/transporter-ws/endpoint</ws.url>
 
-        <ws.url>http://localhost:8080/broker-ws/endpoint</ws.url>
-
-        <ws.name>UpaBroker</ws.name>
+        <ws.name>UpaBroker${ws.i}</ws.name>
         <uddi.url>http://localhost:9090</uddi.url>
+        <ca.name>UpaCa</ca.name>
     </properties>
 
     <dependencies>
@@ -63,12 +66,19 @@
             <artifactId>transporter-ws-cli</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!-- ca-ws-cli -->
+        <dependency>
+            <groupId>pt.upa.a44</groupId>
+            <artifactId>ca-ws-cli</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <!-- ws-handlers -->
         <dependency>
             <groupId>pt.upa.a44</groupId>
             <artifactId>ws-handlers</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -130,6 +140,8 @@
                         <argument>${uddi.url}</argument>
                         <argument>${ws.name}</argument>
                         <argument>${ws.url}</argument> 
+                        <argument>${ca.name}</argument>
+                        <argument>${ws.i}</argument>
                     </arguments>
                 </configuration>
             </plugin>

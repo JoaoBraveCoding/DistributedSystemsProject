@@ -54,6 +54,13 @@
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="ping" type="tns:ping" />
+            
+            <xs:complexType name="imAlive">
+                <xs:sequence>
+					<xs:element name="name" type="xs:string" minOccurs="0" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="imAlive" type="tns:imAlive" />
         
             <xs:complexType name="pingResponse">
                 <xs:sequence>
@@ -61,7 +68,13 @@
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="pingResponse" type="tns:pingResponse" />
-        
+
+            <xs:complexType name="updateBackup">
+                <xs:sequence>
+                    <xs:element name="transportToUpdate" type="tns:transportView" minOccurs="0" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="updateBackup" type="tns:updateBackup" />
         
             <xs:complexType name="requestTransport">
                 <xs:sequence>
@@ -165,6 +178,14 @@
     <message name="pingResponse">
         <part name="parameters" element="tns:pingResponse" />
     </message>
+    
+    <message name="updateBackup">
+        <part name="parameters" element="tns:updateBackup" />
+    </message>
+    
+    <message name="imAlive">
+        <part name="parameters" element="tns:imAlive" />
+    </message>
 
     <message name="requestTransport">
         <part name="parameters" element="tns:requestTransport" />
@@ -218,6 +239,16 @@
                 message="tns:ping" />
             <output wsam:Action="http://ws.broker.upa.pt/BrokerPort/pingResponse"
                 message="tns:pingResponse" />
+        </operation>
+        
+         <operation name="imAlive">
+         	<input wsam:Action="http://ws.broker.upa.pt/BrokerPort/imAlive"
+                message="tns:imAlive" />
+        </operation>
+        
+		<operation name="updateBackup">
+            <input wsam:Action="http://ws.broker.upa.pt/BrokerPort/updateBackup"
+                message="tns:updateBackup" />
         </operation>
 
         <operation name="requestTransport">
@@ -281,6 +312,20 @@
             <output>
                 <soap:body use="literal" />
             </output>
+        </operation>
+        
+        <operation name="imAlive">
+        	<soap:operation soapAction="" />
+            <input>
+                <soap:body use="literal" />
+            </input>
+        </operation>
+        
+	   <operation name="updateBackup">
+            <soap:operation soapAction="" />
+            <input>
+                <soap:body use="literal" />
+            </input>
         </operation>
 
         <operation name="requestTransport">
