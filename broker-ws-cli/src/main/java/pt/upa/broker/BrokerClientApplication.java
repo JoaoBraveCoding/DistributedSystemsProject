@@ -22,12 +22,13 @@ public class BrokerClientApplication {
     BrokerClient client = new BrokerClient(args[0], args[1]);
     
     System.out.println("Remote call ...");
+    System.out.println("Write 'help' for help.");
     Scanner sc = new Scanner(System.in);
     String input = "";
     String result = "";
     String id = "";
     while(true){
-      System.out.print("$");
+      System.out.print("$ ");
       input = sc.nextLine();
       if(input.equals("quit")){
         break;
@@ -37,6 +38,13 @@ public class BrokerClientApplication {
         System.out.println(result);
       } else if(input.equals("list")){
         System.out.println("\nSize of list: " + client.listTransports().size());
+      } else if(input.equals("help")){
+        System.out.println("Commands:");
+        System.out.println("ping");
+        System.out.println("clear - clear transports list");
+        System.out.println("request1 - requestTransport(\"Coimbra\",\"Lisboa\", randomPrice)");
+        System.out.println("request2 - requestTransport(\"Porto\",\"Beja\", randomPrice)");
+        System.out.println("view - view state of last requested transport");
       } else if(input.equals("clear")){
         id ="";
         client.clearTransports();

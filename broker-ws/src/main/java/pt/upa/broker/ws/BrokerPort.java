@@ -158,11 +158,17 @@ public class BrokerPort implements BrokerPortType {
 
     if(bestJob==null && !one_job_not_null){
       transport.setState(TransportStateView.FAILED);
+      if(secondaryBroker!=null){
+        secondaryBroker.updateBackup(transport);
+      }
       UnavailableTransportFault fault = new UnavailableTransportFault();
       throw new UnavailableTransportFault_Exception("No transporter for the job", fault);
     }
     else if(bestJob==null && one_job_not_null){
       transport.setState(TransportStateView.FAILED);
+      if(secondaryBroker!=null){
+        secondaryBroker.updateBackup(transport);
+      }
       UnavailableTransportPriceFault fault = new UnavailableTransportPriceFault();
       throw new UnavailableTransportPriceFault_Exception("Unavailable price", fault);
     }
@@ -339,17 +345,18 @@ public class BrokerPort implements BrokerPortType {
     
     secondaryBroker = port;
   }
-    
+
   @Override
   public void updateBackup(TransportView tv){
     System.out.println("updating transport with id: "+tv.getId());
     if(!primaryBroker){
-      try{
-        TransportView tmp = viewTransport(tv.getId().split("_")[0]);
-        copyTransportView(tmp, tv);
-      } catch(UnknownTransportFault_Exception e2){
-        transports.add(tv);
+      for(TransportView tmp: transports){
+        if(tmp.getId().equals(tv.getId())){
+          copyTransportView(tmp,tv);
+          return;
+        }
       }
+      transports.add(tv);
     }
   }
   
