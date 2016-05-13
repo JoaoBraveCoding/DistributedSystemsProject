@@ -66,8 +66,7 @@ mvn install
 cd ws-handlers
 mvn install  (caso tenha removido as keys das respectivas pastas os testes vão falhar)
 cd transporter-ws-cli
-mvn install (caso a transporter-ws esteja configurada para usar handlers deverá adicionar a flag 
-             -DskipTests caso contrário precisa de remover a pasta jaxws do src)
+mvn install
 
 ```
 
@@ -84,9 +83,8 @@ mvn exec:java
 ```
 
 [2] Construir **cliente** e executar testes
-These tests require two transporters to be running at the same time and the server **MUST** not user security handlers
-if you want to run this tests you **MUST remove/move the folder jaxws in src/** and **remove the anotation "@HandlerChain"**
-**from the file TransporterPort.java in transporter-ws**
+These tests require two transporters to be running at the same time and the server **MUST** not use security handlers
+if you want to run these tests without handlers you **MUST remove/move the folder jaxws in src/** and **remove the anotation "@HandlerChain" from the file TransporterPort.java in transporter-ws**
 
 ```
 No Handlers:
@@ -94,7 +92,7 @@ cd transporter-ws-cli
 mvn clean install
 With Handlers:
 cd transporter-ws-cli
-mvn clean install -DskipTests
+mvn clean install
 ```
 
 
